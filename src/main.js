@@ -10,33 +10,51 @@ import {getPointList} from "./view/point-list";
 import {getPointEdit} from "./view/point-edit";
 import {getPoint} from "./view/point";
 import {render, POINT_COUNT, Position} from "./helpers";
+import {generatePoint} from "./mock/point";
 
-const TripMainElement = document.querySelector(`.trip-main`);
-const ControlsElement = document.querySelector(`.trip-controls`);
-const PointsContainerElement = document.querySelector(`.trip-events`);
+const points = new Array(POINT_COUNT).fill(``).map(generatePoint);
 
-render(TripMainElement, getTripInfo(), Position.AFTER_BEGIN);
+let days = [];
 
-const TripInfoElement = document.querySelector(`.trip-info`);
-render(TripInfoElement, getRoute(), Position.AFTER_BEGIN);
-render(TripInfoElement, getTotalCost(), Position.BEFORE_END);
+points.forEach(({dates}) => {
+  const startDay = dates.startDate.toLocaleDateString(`en-US`);
+  if (!days.find((day) => day === startDay)) {
+    days.push(startDay);
+  }
+});
 
-render(ControlsElement, getNav(), Position.BEFORE_END);
-render(ControlsElement, getFilters(), Position.BEFORE_END);
+days = days.map((day) => new Date(day)).sort((a, b) => a - b);
 
-render(PointsContainerElement, getSorting(), Position.BEFORE_END);
-render(PointsContainerElement, getPointEdit(), Position.BEFORE_END);
-render(PointsContainerElement, getDayList(), Position.BEFORE_END);
+const tripMainElement = document.querySelector(`.trip-main`);
+const controlsElement = document.querySelector(`.trip-controls`);
+const pointsContainerElement = document.querySelector(`.trip-events`);
+
+render(tripMainElement, getTripInfo(), Position.AFTER_BEGIN);
+
+const tripInfoElement = document.querySelector(`.trip-info`);
+render(tripInfoElement, getRoute(), Position.AFTER_BEGIN);
+render(tripInfoElement, getTotalCost(), Position.BEFORE_END);
+
+render(controlsElement, getNav(), Position.BEFORE_END);
+render(controlsElement, getFilters(), Position.BEFORE_END);
+
+render(pointsContainerElement, getSorting(), Position.BEFORE_END);
+render(pointsContainerElement, getPointEdit(), Position.BEFORE_END);
+render(pointsContainerElement, getDayList(), Position.BEFORE_END);
 
 const TripDayListElement = document.querySelector(`.trip-days`);
-render(TripDayListElement, getDay(), Position.BEFORE_END);
 
-const TripDayElement = document.querySelector(`.trip-days__item`);
-render(TripDayElement, getPointList(), Position.BEFORE_END);
+days.forEach((day, i) => {
+  render(TripDayListElement, getDay(day, i), Position.BEFORE_END);
+});
 
-const PointListElement = document.querySelector(`.trip-events__list`);
+const tripDayElements = document.querySelectorAll(`.trip-days__item`);
 
-for (let i = 0; i < POINT_COUNT; i++) {
-  render(PointListElement, getPoint(), Position.BEFORE_END);
-}
-
+days.forEach((day, i) => {
+  render(tripDayElements[i], getPointList(), Position.BEFORE_END);
+  const pointListElement = tripDayElements[i].querySelector(`.trip-events__list`);
+  const pointsForCurrentDay = points.filter(({dates}) => dates.startDate.toLocaleDateString(`en-US`) === day.toLocaleDateString(`en-US`));
+  pointsForCurrentDay.forEach((point) => {
+    render(pointListElement, getPoint(point), Position.BEFORE_END);
+  });
+});
