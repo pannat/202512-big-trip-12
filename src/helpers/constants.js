@@ -7,9 +7,16 @@ const Position = {
   AFTER_END: `afterend`
 };
 
-const groupToPretext = {
-  action: `to`,
-  place: `in`
+const EventTypes = {
+  TRANSFER: [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`],
+  ACTIVITY: [`check-in`, `sightseeing`, `restaurant`]
 };
 
-export {Position, POINT_COUNT, groupToPretext};
+const cities = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
+
+const groupToPretext = {
+  transfer: `to`,
+  activity: `in`
+};
+
+export {Position, EventTypes, POINT_COUNT, groupToPretext, cities};

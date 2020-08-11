@@ -13,7 +13,7 @@ const getRandomInt = (a = 1, b = 0) => {
 };
 
 const getTime = (date) => {
-  return date.toLocaleTimeString(`en-US`).slice(0, 5);
+  return date.toLocaleTimeString(`en-US`, {hour: `numeric`, minute: `numeric`, hour12: false});
 };
 
 export {render, getUpperFirst, getRandomInt, getTime};

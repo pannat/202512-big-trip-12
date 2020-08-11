@@ -39,7 +39,7 @@ render(controlsElement, getNav(), Position.BEFORE_END);
 render(controlsElement, getFilters(), Position.BEFORE_END);
 
 render(pointsContainerElement, getSorting(), Position.BEFORE_END);
-render(pointsContainerElement, getPointEdit(), Position.BEFORE_END);
+render(pointsContainerElement, getPointEdit(points[0]), Position.BEFORE_END);
 render(pointsContainerElement, getDayList(), Position.BEFORE_END);
 
 const TripDayListElement = document.querySelector(`.trip-days`);
