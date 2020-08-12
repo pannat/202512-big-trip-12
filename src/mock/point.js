@@ -3,8 +3,30 @@ import {getRandomInt} from "../helpers";
 const destinations = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
 
 const additionalOptions = {
-  transfer: [`add luggage`, `switch to comfort class`],
-  activity: [`add meal`, `choose seats`, `travel by train`]
+  transfer: [
+    {
+      name: `luggage`,
+      displayName: `add luggage`
+    },
+    {
+      name: `comfort`,
+      displayName: `switch to comfort class`
+    }
+  ],
+  activity: [
+    {
+      name: `meal`,
+      displayName: `add meal`
+    },
+    {
+      name: `seats`,
+      displayName: `choose seats`
+    },
+    {
+      name: `train`,
+      displayName: `travel by train`
+    }
+  ]
 };
 
 const sentences = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`
@@ -12,7 +34,7 @@ const sentences = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras
 
 const getRandomArray = (source, count) => {
   const sourceCopy = source.slice();
-  return new Array(getRandomInt(0, count)).fill(``).map(() => sourceCopy.splice(getRandomInt(0, sourceCopy.length - 1), 1)[0]);
+  return new Array(getRandomInt(1, count)).fill(``).map(() => sourceCopy.splice(getRandomInt(0, sourceCopy.length - 1), 1)[0]);
 };
 
 const types = {
@@ -41,10 +63,10 @@ const generateDate = () => {
   startDate.setHours(getRandomInt(0, 23), getRandomInt(0, 59), getRandomInt(0, 59), getRandomInt(0, 999));
   startDate.setDate(startDate.getDate() + daysGap);
 
-  const diff = getRandomInt(1, 5);
+  const diff = getRandomInt(1, 7);
   const endDate = new Date();
   endDate.setHours(getRandomInt(0, 23), getRandomInt(0, 59), getRandomInt(0, 59), getRandomInt(0, 999));
-  startDate.setDate(startDate.getDate() + diff);
+  endDate.setDate(startDate.getDate() + diff);
 
   return {
     startDate,
@@ -54,7 +76,8 @@ const generateDate = () => {
 
 const generateOffers = (offers) => {
   return offers.map((offer) => ({
-    title: offer,
+    name: offer.name,
+    displayName: offer.displayName,
     price: getRandomInt(10, 220),
     isApply: !!getRandomInt()
   }));

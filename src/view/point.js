@@ -1,11 +1,11 @@
 import {getUpperFirst, groupToPretext, getTime} from "../helpers";
 
-const getPoint = ({type, groupType, destination, dates, price, offers}) => `<li class="trip-events__item">
+const getPoint = ({type, group, destination, dates, price, offers}) => `<li class="trip-events__item">
                   <div class="event">
                     <div class="event__type">
                       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                     </div>
-                    <h3 class="event__title">${getUpperFirst(type)} ${groupToPretext[groupType]} ${getUpperFirst(destination.name)}</h3>
+                    <h3 class="event__title">${getUpperFirst(type)} ${groupToPretext[group]} ${getUpperFirst(destination.name)}</h3>
 
                     <div class="event__schedule">
                       <p class="event__time">
@@ -23,7 +23,7 @@ const getPoint = ({type, groupType, destination, dates, price, offers}) => `<li 
                     <h4 class="visually-hidden">Offers:</h4>
                     <ul class="event__selected-offers">
                       ${offers.map((offer) => `<li class="event__offer">
-                        <span class="event__offer-title">${offer.title}</span>
+                        <span class="event__offer-title">${offer.displayName}</span>
                         &plus;
                         &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
                        </li>`).join(``)}
