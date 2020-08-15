@@ -32,10 +32,6 @@ class PointEdit {
     this._element = null;
   }
 
-  setOnCloseButton(fn) {
-    this._onCloseButton = fn;
-  }
-
   setOnSubmitForm(fn) {
     this._onSubmitForm = (evt) => {
       evt.preventDefault();
@@ -44,7 +40,6 @@ class PointEdit {
   }
 
   setHandlers() {
-    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._onCloseButton);
     this.getElement().addEventListener(`submit`, this._onSubmitForm);
   }
 
