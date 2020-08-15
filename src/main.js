@@ -8,6 +8,11 @@ import PointEdit from "./view/point-edit";
 import Point from "./view/point";
 import {render, POINT_COUNT, LOCALE, RenderPosition} from "./helpers";
 import {generatePoint, filterList, sortingTypes} from "./mock";
+import MessageNoPoints from "./view/message-no-points";
+
+const tripMainElement = document.querySelector(`.trip-main`);
+const controlsElement = document.querySelector(`.trip-controls`);
+const pointsContainerElement = document.querySelector(`.trip-events`);
 
 const points = new Array(POINT_COUNT).fill(``).map(generatePoint).sort((a, b) => a.dates.startDate - b.dates.startDate);
 
@@ -36,12 +41,8 @@ const uniqueCities = () => {
 
 const getRouteDates = () => {
   const sortedPointsByEndDate = points.sort((a, b) => b.dates.endDate - a.dates.endDate);
-  return [points[0].dates.startDate, sortedPointsByEndDate[0].dates.endDate];
+  return points.length ? [points[0].dates.startDate, sortedPointsByEndDate[0].dates.endDate] : ``;
 };
-
-const tripMainElement = document.querySelector(`.trip-main`);
-const controlsElement = document.querySelector(`.trip-controls`);
-const pointsContainerElement = document.querySelector(`.trip-events`);
 
 
 const tripInfo = new TripInfo(totalPrice());
@@ -56,8 +57,13 @@ const filters = new Filters(filterList);
 render(controlsElement, nav.getElement(), RenderPosition.BEFORE_END);
 render(controlsElement, filters.getElement(), RenderPosition.BEFORE_END);
 
-const sorting = new Sorting(sortingTypes);
-render(pointsContainerElement, sorting.getElement(), RenderPosition.BEFORE_END);
+if (points.length) {
+  const sorting = new Sorting(sortingTypes);
+  render(pointsContainerElement, sorting.getElement(), RenderPosition.BEFORE_END);
+} else {
+  const message = new MessageNoPoints();
+  render(pointsContainerElement, message.getElement(), RenderPosition.BEFORE_END);
+}
 
 const days = new Days(uniqueDays);
 render(pointsContainerElement, days.getElement(), RenderPosition.BEFORE_END);
@@ -69,22 +75,28 @@ pointListElements.forEach((element, i) => {
   pointsForCurrentList.forEach((it) => {
     const point = new Point(it);
     const pointEdit = new PointEdit(it);
-    const renderPoint = () => {
+    const replaceFormToCard = () => {
       element.replaceChild(point.getElement(), pointEdit.getElement());
       point.setHandlers();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    };
+
+    const onEscKeyDown = (evt) => {
+      if (evt.key === `Escape` || evt.key === `Esc`) {
+        evt.preventDefault();
+        replaceFormToCard();
+        document.removeEventListener(`keydown`, onEscKeyDown);
+      }
     };
 
     point.setOnRollupButton(() => {
       element.replaceChild(pointEdit.getElement(), point.getElement());
       pointEdit.setHandlers();
-    });
-
-    pointEdit.setOnCloseButton(() => {
-      renderPoint();
+      document.addEventListener(`keydown`, onEscKeyDown);
     });
 
     pointEdit.setOnSubmitForm(() => {
-      renderPoint();
+      replaceFormToCard();
     });
 
     render(element, point.getElement(), RenderPosition.BEFORE_END);
