@@ -1,10 +1,27 @@
 const POINT_COUNT = 20;
 
-const Position = {
-  BEFORE_BEGIN: `beforebegin`,
+const LOCALE = `en-US`;
+
+const RenderPosition = {
   AFTER_BEGIN: `afterbegin`,
   BEFORE_END: `beforeend`,
-  AFTER_END: `afterend`
+};
+
+const Format = {
+  DATE_LONG: {
+    year: `numeric`,
+    month: `numeric`,
+    day: `numeric`
+  },
+  DATE_SHORT: {
+    day: `numeric`,
+    month: `short`
+  },
+  TIME: {
+    hour: `numeric`,
+    minute: `numeric`,
+    hour12: false
+  }
 };
 
 const EventTypes = {
@@ -19,4 +36,21 @@ const groupToPretext = {
   activity: `in`
 };
 
-export {Position, EventTypes, POINT_COUNT, groupToPretext, cities};
+const newPoint = {
+  id: null,
+  type: ``,
+  price: null,
+  dates: {
+    startDate: new Date(),
+    endDate: new Date()
+  },
+  destination: {
+    name: ``,
+    description: ``,
+    photos: []
+  },
+  offers: []
+};
+
+
+export {POINT_COUNT, LOCALE, RenderPosition, Format, EventTypes, groupToPretext, cities, newPoint};
