@@ -1,28 +1,65 @@
-import {getUpperFirst, groupToPretext, getTime} from "../helpers";
+import {getUpperFirst, groupToPretext, getFormattedDate, createElement, Format} from "../helpers";
 
-const getPoint = ({type, group, destination, dates, price, offers}) => `<li class="trip-events__item">
+class Point {
+  constructor({type, group, destination, dates, price, offers}) {
+    this._type = type;
+    this._group = group;
+    this._destination = destination;
+    this._startDate = dates.startDate;
+    this._endDate = dates.endDate;
+    this._price = price;
+    this._offers = offers;
+    this._element = null;
+
+    this._onRollupButton = null;
+  }
+
+  setOnRollupButton(fn) {
+    this._onRollupButton = fn;
+  }
+
+  setHandlers() {
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._onRollupButton);
+  }
+
+  getElement() {
+    if (this._element) {
+      return this._element;
+    }
+
+    this._element = createElement(this._getTemplate());
+    return this._element;
+  }
+
+  removeElement() {
+    this._element.remove();
+    this._element = null;
+  }
+
+  _getTemplate() {
+    return `<li class="trip-events__item">
                   <div class="event">
                     <div class="event__type">
-                      <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
+                      <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type}.png" alt="Event type icon">
                     </div>
-                    <h3 class="event__title">${getUpperFirst(type)} ${groupToPretext[group]} ${getUpperFirst(destination.name)}</h3>
+                    <h3 class="event__title">${getUpperFirst(this._type)} ${groupToPretext[this._group]} ${getUpperFirst(this._destination.name)}</h3>
 
                     <div class="event__schedule">
                       <p class="event__time">
-                        <time class="event__start-time" datetime="${dates.startDate.toISOString()}">${getTime(dates.startDate)}</time>
+                        <time class="event__start-time" datetime="${this._startDate.toISOString()}">${getFormattedDate(this._startDate, Format.TIME, false)}</time>
                         &mdash;
-                        <time class="event__end-time" datetime="${dates.endDate.toISOString()}">${getTime(dates.endDate)}</time>
+                        <time class="event__end-time" datetime="${this._endDate.toISOString()}">${getFormattedDate(this._endDate, Format.TIME, false)}</time>
                       </p>
                       <p class="event__duration">30M</p>
                     </div>
 
                     <p class="event__price">
-                      &euro;&nbsp;<span class="event__price-value">${price}</span>
+                      &euro;&nbsp;<span class="event__price-value">${this._price}</span>
                     </p>
 
                     <h4 class="visually-hidden">Offers:</h4>
                     <ul class="event__selected-offers">
-                      ${offers.map((offer) => `<li class="event__offer">
+                      ${this._offers.map((offer) => `<li class="event__offer">
                         <span class="event__offer-title">${offer.displayName}</span>
                         &plus;
                         &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
@@ -34,6 +71,8 @@ const getPoint = ({type, group, destination, dates, price, offers}) => `<li clas
                     </button>
                   </div>
                 </li>`.trim();
+  }
+}
 
-export {getPoint};
+export default Point;
 

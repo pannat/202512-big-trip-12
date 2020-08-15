@@ -1,4 +1,4 @@
-const filters = [
+const filterList = [
   {
     name: `everything`,
     isApply: true
@@ -13,4 +13,4 @@ const filters = [
   }
 ];
 
-export {filters};
+export {filterList};

@@ -6,7 +6,7 @@
   "scripts": {
     "eslint": "eslint src/**/*.js",
     "test": "npm run eslint",
-    "start": "webpack-dev-server --open",
+    "start": "webpack-dev-server --open --disable-host-check=true",
     "build": "webpack"
   },
   "devDependencies": {

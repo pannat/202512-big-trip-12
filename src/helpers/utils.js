@@ -1,5 +1,14 @@
+import {RenderPosition, LOCALE} from "./constants";
+
 const render = (container, element, place) => {
-  container.insertAdjacentHTML(place, element);
+  switch (place) {
+    case RenderPosition.AFTER_BEGIN:
+      container.prepend(element);
+      break;
+    case RenderPosition.BEFORE_END:
+      container.append(element);
+      break;
+  }
 };
 
 const getUpperFirst = (string) => {
@@ -12,25 +21,16 @@ const getRandomInt = (a = 1, b = 0) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-const formatDate = {
-  year: `numeric`,
-  month: `numeric`,
-  day: `numeric`
-};
-
-const getDate = (date) => {
-  return date.toLocaleDateString(`en-US`, formatDate);
-};
-
-const formatTime = {
-  hour: `numeric`,
-  minute: `numeric`,
-  hour12: false
-};
-
-const getTime = (date) => {
-  return date.toLocaleTimeString(`en-US`, formatTime);
+const getFormattedDate = (date, format, isDate = true) => {
+  return isDate ? date.toLocaleDateString(LOCALE, format) : date.toLocaleTimeString(LOCALE, format);
 };
 
 
-export {render, getUpperFirst, getRandomInt, getTime, getDate};
+export const createElement = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+
+  return newElement.firstChild;
+};
+
+export {render, getUpperFirst, getRandomInt, getFormattedDate};

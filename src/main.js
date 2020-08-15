@@ -1,41 +1,22 @@
-import {getTripInfo} from "./view/trip-info";
-import {getRoute} from "./view/route";
-import {getTotalCost} from "./view/total-cost";
-import {getNav} from "./view/nav";
-import {getFilters} from "./view/filters";
-import {getSorting} from "./view/sorting";
-import {getDayList} from "./view/day-list";
-import {getDay} from "./view/day";
-import {getPointList} from "./view/point-list";
-import {getPointEdit} from "./view/point-edit";
-import {getPoint} from "./view/point";
-import {render, POINT_COUNT, Position} from "./helpers";
-import {generatePoint, filters, sortingTypes} from "./mock";
+import TripInfo from "./view/trip-info";
+import Route from "./view/route";
+import Nav from "./view/nav";
+import Filters from "./view/filters";
+import Sorting from "./view/sorting";
+import Days from "./view/days";
+import PointEdit from "./view/point-edit";
+import Point from "./view/point";
+import {render, POINT_COUNT, LOCALE, RenderPosition} from "./helpers";
+import {generatePoint, filterList, sortingTypes} from "./mock";
 
 const points = new Array(POINT_COUNT).fill(``).map(generatePoint).sort((a, b) => a.dates.startDate - b.dates.startDate);
 
-const newPoint = {
-  id: null,
-  type: ``,
-  price: null,
-  dates: {
-    startDate: new Date(),
-    endDate: new Date()
-  },
-  destination: {
-    name: ``,
-    description: ``,
-    photos: []
-  },
-  offers: []
-};
-
-let days = [];
+let uniqueDays = [];
 
 points.forEach(({dates}) => {
   const startDay = dates.startDate.toLocaleDateString(`en-US`);
-  if (days.indexOf(startDay) === -1) {
-    days.push(new Date(startDay));
+  if (uniqueDays.indexOf(startDay) === -1) {
+    uniqueDays.push(new Date(startDay));
   }
 });
 
@@ -53,7 +34,7 @@ const uniqueCities = () => {
   return cities;
 };
 
-const getDates = () => {
+const getRouteDates = () => {
   const sortedPointsByEndDate = points.sort((a, b) => b.dates.endDate - a.dates.endDate);
   return [points[0].dates.startDate, sortedPointsByEndDate[0].dates.endDate];
 };
@@ -62,34 +43,52 @@ const tripMainElement = document.querySelector(`.trip-main`);
 const controlsElement = document.querySelector(`.trip-controls`);
 const pointsContainerElement = document.querySelector(`.trip-events`);
 
-render(tripMainElement, getTripInfo(), Position.AFTER_BEGIN);
+
+const tripInfo = new TripInfo(totalPrice());
+render(tripMainElement, tripInfo.getElement(), RenderPosition.AFTER_BEGIN);
 
 const tripInfoElement = document.querySelector(`.trip-info`);
-render(tripInfoElement, getRoute(uniqueCities(), getDates()), Position.AFTER_BEGIN);
-render(tripInfoElement, getTotalCost(totalPrice()), Position.BEFORE_END);
+const route = new Route(uniqueCities(), getRouteDates());
+render(tripInfoElement, route.getElement(), RenderPosition.AFTER_BEGIN);
 
-render(controlsElement, getNav(), Position.BEFORE_END);
-render(controlsElement, getFilters(filters), Position.BEFORE_END);
+const nav = new Nav();
+const filters = new Filters(filterList);
+render(controlsElement, nav.getElement(), RenderPosition.BEFORE_END);
+render(controlsElement, filters.getElement(), RenderPosition.BEFORE_END);
 
-render(pointsContainerElement, getSorting(sortingTypes), Position.BEFORE_END);
-render(pointsContainerElement, getPointEdit(newPoint), Position.BEFORE_END);
-render(pointsContainerElement, getDayList(), Position.BEFORE_END);
+const sorting = new Sorting(sortingTypes);
+render(pointsContainerElement, sorting.getElement(), RenderPosition.BEFORE_END);
 
-const TripDayListElement = document.querySelector(`.trip-days`);
+const days = new Days(uniqueDays);
+render(pointsContainerElement, days.getElement(), RenderPosition.BEFORE_END);
 
-days.forEach((day, i) => {
-  render(TripDayListElement, getDay(day, i), Position.BEFORE_END);
-});
+const pointListElements = document.querySelectorAll(`.trip-events__list`);
 
-const tripDayElements = document.querySelectorAll(`.trip-days__item`);
+pointListElements.forEach((element, i) => {
+  const pointsForCurrentList = points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === uniqueDays[i].toLocaleDateString(LOCALE));
+  pointsForCurrentList.forEach((it) => {
+    const point = new Point(it);
+    const pointEdit = new PointEdit(it);
+    const renderPoint = () => {
+      element.replaceChild(point.getElement(), pointEdit.getElement());
+      point.setHandlers();
+    };
 
-days.forEach((day, i) => {
-  render(tripDayElements[i], getPointList(), Position.BEFORE_END);
-  const pointListElement = tripDayElements[i].querySelector(`.trip-events__list`);
-  const pointsForCurrentDay = points.filter(({dates}) => dates.startDate.toLocaleDateString(`en-US`) === day.toLocaleDateString(`en-US`));
-  pointsForCurrentDay.forEach((point) => {
-    render(pointListElement, getPoint(point), Position.BEFORE_END);
+    point.setOnRollupButton(() => {
+      element.replaceChild(pointEdit.getElement(), point.getElement());
+      pointEdit.setHandlers();
+    });
+
+    pointEdit.setOnCloseButton(() => {
+      renderPoint();
+    });
+
+    pointEdit.setOnSubmitForm(() => {
+      renderPoint();
+    });
+
+    render(element, point.getElement(), RenderPosition.BEFORE_END);
+    point.setHandlers();
   });
 });
-
 
