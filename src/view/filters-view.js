@@ -1,23 +1,10 @@
-import {createElement, getUpperFirst} from "../helpers";
+import AbstractView from "./abstract-view";
+import {getUpperFirst} from "../utils";
 
-class Filters {
+class FiltersView extends AbstractView {
   constructor(filterList) {
+    super();
     this._filterList = filterList;
-    this._element = null;
-  }
-
-  getElement() {
-    if (this._element) {
-      return this._element;
-    }
-    this._element = createElement(this._getTemplate());
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
   }
 
   _getTemplate() {
@@ -38,5 +25,5 @@ class Filters {
   }
 }
 
-export default Filters;
+export default FiltersView;
 

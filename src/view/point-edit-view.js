@@ -1,10 +1,12 @@
-import {EventTypes, groupToPretext, cities, getUpperFirst, getFormattedDate, Format, createElement} from "../helpers";
+import AbstractView from "./abstract-view";
+import {EventTypes, groupToPretext, cities, getUpperFirst, getFormattedDate, Format} from "../utils";
 
 const DEFAULT_TYPE = `bus`;
 const DEFAULT_GROUP = `transfer`;
 
-class PointEdit {
+class PointEditView extends AbstractView {
   constructor({id, type, group, destination, dates, price, offers}) {
+    super();
     this._key = id === null ? `new` : id;
     this._type = type ? type : DEFAULT_TYPE;
     this._group = group ? group : DEFAULT_GROUP;
@@ -13,34 +15,12 @@ class PointEdit {
     this._endDate = dates.endDate;
     this._destination = destination;
     this._offers = offers;
-    this._element = null;
-    this._onCloseButton = null;
-    this._onSubmitForm = null;
+    this._onFormSubmit = this._onFormSubmit.bind(this);
   }
 
-  getElement() {
-    if (this._element) {
-      return this._element;
-    }
-    this._element = createElement(this._getTemplate());
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
-  }
-
-  setOnSubmitForm(fn) {
-    this._onSubmitForm = (evt) => {
-      evt.preventDefault();
-      fn();
-    };
-  }
-
-  setHandlers() {
-    this.getElement().addEventListener(`submit`, this._onSubmitForm);
+  setOnSubmitForm(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().addEventListener(`submit`, this._onFormSubmit);
   }
 
   _getDateForCalendar(date) {
@@ -159,7 +139,12 @@ class PointEdit {
             </section>
           </form>`.trim();
   }
+
+  _onFormSubmit(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit();
+  }
 }
 
-export default PointEdit;
+export default PointEditView;
 

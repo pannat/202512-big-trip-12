@@ -2,11 +2,6 @@ const POINT_COUNT = 20;
 
 const LOCALE = `en-US`;
 
-const RenderPosition = {
-  AFTER_BEGIN: `afterbegin`,
-  BEFORE_END: `beforeend`,
-};
-
 const Format = {
   DATE_LONG: {
     year: `numeric`,
@@ -53,4 +48,4 @@ const newPoint = {
 };
 
 
-export {POINT_COUNT, LOCALE, RenderPosition, Format, EventTypes, groupToPretext, cities, newPoint};
+export {POINT_COUNT, LOCALE, Format, EventTypes, groupToPretext, cities, newPoint};

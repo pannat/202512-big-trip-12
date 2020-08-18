@@ -1,7 +1,9 @@
-import {getUpperFirst, groupToPretext, getFormattedDate, createElement, Format} from "../helpers";
+import AbstractView from "./abstract-view";
+import {getUpperFirst, groupToPretext, getFormattedDate, Format} from "../utils";
 
-class Point {
+class PointView extends AbstractView {
   constructor({type, group, destination, dates, price, offers}) {
+    super();
     this._type = type;
     this._group = group;
     this._destination = destination;
@@ -9,31 +11,13 @@ class Point {
     this._endDate = dates.endDate;
     this._price = price;
     this._offers = offers;
-    this._element = null;
 
-    this._onRollupButton = null;
+    this._onButtonClick = this._onButtonClick.bind(this);
   }
 
-  setOnRollupButton(fn) {
-    this._onRollupButton = fn;
-  }
-
-  setHandlers() {
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._onRollupButton);
-  }
-
-  getElement() {
-    if (this._element) {
-      return this._element;
-    }
-
-    this._element = createElement(this._getTemplate());
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
+  setOnButtonClick(callback) {
+    this._callback.clickButton = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._onButtonClick);
   }
 
   _getTemplate() {
@@ -72,7 +56,13 @@ class Point {
                   </div>
                 </li>`.trim();
   }
+
+  _onButtonClick(evt) {
+    evt.preventDefault();
+
+    this._callback.clickButton();
+  }
 }
 
-export default Point;
+export default PointView;
 

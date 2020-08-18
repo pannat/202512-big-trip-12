@@ -1,23 +1,10 @@
-import {createElement, getUpperFirst} from "../helpers";
+import AbstractView from "./abstract-view";
+import {getUpperFirst} from "../utils";
 
-class Sorting {
+class SortingView extends AbstractView {
   constructor(sortingTypes) {
+    super();
     this._sortingTypes = sortingTypes;
-    this._element = null;
-  }
-
-  getElement() {
-    if (this._element) {
-      return this._element;
-    }
-    this._element = createElement(this._getTemplate());
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
   }
 
   _getTemplate() {
@@ -43,4 +30,4 @@ class Sorting {
   }
 }
 
-export default Sorting;
+export default SortingView;

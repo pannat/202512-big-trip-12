@@ -1,24 +1,11 @@
-import {createElement, getFormattedDate, Format} from "../helpers";
+import AbstractView from "./abstract-view";
+import {getFormattedDate, Format} from "../utils";
 
-class Route {
+class RouteView extends AbstractView {
   constructor(cities, dates) {
+    super();
     this._cities = cities;
     this._dates = dates;
-    this._element = null;
-  }
-
-  getElement() {
-    if (this._element) {
-      return this._element;
-    }
-    this._element = createElement(this._getTemplate());
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
   }
 
   _getDates() {
@@ -42,5 +29,5 @@ class Route {
   }
 }
 
-export default Route;
+export default RouteView;
 

@@ -1,23 +1,9 @@
-import {createElement} from "../helpers";
+import AbstractView from "./abstract-view";
 
-class TripInfo {
+class TripInfoView extends AbstractView {
   constructor(totalPrice) {
+    super();
     this._totalPrice = totalPrice ? totalPrice : 0;
-    this._element = null;
-  }
-
-  getElement() {
-    if (this._element) {
-      return this._element;
-    }
-    this._element = createElement(this._getTemplate());
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
   }
 
   _getTemplate() {
@@ -29,4 +15,4 @@ class TripInfo {
   }
 }
 
-export default TripInfo;
+export default TripInfoView;
