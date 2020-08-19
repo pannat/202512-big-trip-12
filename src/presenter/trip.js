@@ -2,6 +2,7 @@ import DaysView from "../view/days-view";
 import {render, RenderPosition, LOCALE, replace} from "../utils";
 import PointView from "../view/point-view";
 import PointEditView from "../view/point-edit-view";
+import NoPointsView from "../view/no-points-view";
 
 class Trip {
   constructor(container) {
@@ -9,14 +10,18 @@ class Trip {
   }
 
   init(points) {
-    this._points = points.slice(0);
+    this._points = points.slice(0).sort((a, b) => a.dates.startDate - b.dates.startDate);
+    if (this._points.length) {
+      this.renderTrip();
+    } else {
+      this._renderNoPoints();
+    }
+  }
+
+  renderTrip() {
     const uniqueDays = this._getUniqueDays();
-    this._daysView = new DaysView(uniqueDays);
-    render(this._container, this._daysView, RenderPosition.BEFORE_END);
-    this._daysView.getTripPointsLists().forEach((element, i) => {
-      const pointsForDay = this._points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === uniqueDays[i].toLocaleDateString(LOCALE));
-      pointsForDay.forEach((point) => this._renderPoint(element, point));
-    });
+    this._renderDays(uniqueDays);
+    this._renderPoints(uniqueDays);
   }
 
   _getUniqueDays() {
@@ -27,11 +32,20 @@ class Trip {
         uniqueDays.push(new Date(startDay));
       }
     });
-
     return uniqueDays;
   }
 
-  _renderSort() {}
+  _renderPoints(days) {
+    this._daysView.getTripPointsLists().forEach((element, i) => {
+      const pointsForDay = this._points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === days[i].toLocaleDateString(LOCALE));
+      pointsForDay.forEach((point) => this._renderPoint(element, point));
+    });
+  }
+
+  _renderDays(days) {
+    this._daysView = new DaysView(days);
+    render(this._container, this._daysView, RenderPosition.BEFORE_END);
+  }
 
   _renderPoint(container, point) {
     const pointView = new PointView(point);
@@ -56,13 +70,16 @@ class Trip {
       }
     };
 
-    render(container, point.getElement(), RenderPosition.BEFORE_END);
-    point.setOnButtonClick(replaceCardToForm);
+    render(container, pointView, RenderPosition.BEFORE_END);
+    pointView.setOnButtonClick(replaceCardToForm);
   }
 
-  _renderNoPoints() {}
+  _renderNoPoints() {
+    const noPointsView = new NoPointsView();
+    render(this._container, noPointsView, RenderPosition.BEFORE_END);
+  }
 
-  _renderTrip() {}
+  _renderSort() {}
 }
 
 export default Trip;
