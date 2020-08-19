@@ -1,23 +1,14 @@
-import {createElement, getFormattedDate, Format} from "../helpers";
+import AbstractView from "./abstract-view";
+import {getFormattedDate, Format} from "../utils";
 
-class Days {
+class DaysView extends AbstractView {
   constructor(days) {
+    super();
     this._days = days;
-    this._element = null;
   }
 
-  getElement() {
-    if (this._element) {
-      return this._element;
-    }
-    this._element = createElement(this._getTemplate());
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
+  getTripPointsLists() {
+    return this._element.querySelectorAll(`.trip-events__list`);
   }
 
   _getTemplate() {
@@ -36,5 +27,5 @@ class Days {
 }
 
 
-export default Days;
+export default DaysView;
 
