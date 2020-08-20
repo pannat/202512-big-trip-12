@@ -15,9 +15,9 @@ class DaysView extends AbstractView {
     return `<ul class="trip-days">
                 ${this._days.map((day, count) => `<li class="trip-days__item day">
                                         <div class="day__info">
-                                          <span class="day__counter">${count + 1}</span>
-                                          <time class="day__date" datetime="${getFormattedDate(day, Format.DATE_SHORT)}">
-                                              ${getFormattedDate(day, Format.DATE_SHORT)}
+                                          <span class="day__counter">${day ? count + 1 : ``}</span>
+                                          <time class="day__date" datetime="${day ? getFormattedDate(day, Format.DATE_SHORT) : ``}">
+                                              ${day ? getFormattedDate(day, Format.DATE_SHORT) : ``}
                                           </time>
                                         </div>
                                         <ul class="trip-events__list"></ul>

@@ -1,5 +1,5 @@
 import AbstractView from "./abstract-view";
-import {EventTypes, groupToPretext, cities, getUpperFirst, getFormattedDate, Format} from "../utils";
+import {Format, groupToPretext, cities, eventTypes, getUpperFirst, getFormattedDate} from "../utils";
 
 const DEFAULT_TYPE = `bus`;
 const DEFAULT_GROUP = `transfer`;
@@ -38,9 +38,9 @@ class PointEditView extends AbstractView {
                 <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${this._key}" type="checkbox">
 
                 <div class="event__type-list">
-                  ${Object.keys(EventTypes).map((eventGroup) => `<fieldset class="event__type-group">
+                  ${Object.keys(eventTypes).map((eventGroup) => `<fieldset class="event__type-group">
                     <legend class="visually-hidden">${getUpperFirst(eventGroup.toLowerCase())}</legend>
-                    ${EventTypes[eventGroup].map((eventType) => `
+                    ${eventTypes[eventGroup].map((eventType) => `
                     <div class="event__type-item">
                       <input
                         id="event-type-${eventType}-${this._key}"

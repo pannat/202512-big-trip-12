@@ -19,9 +19,15 @@ const Format = {
   }
 };
 
-const EventTypes = {
-  TRANSFER: [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`],
-  ACTIVITY: [`check-in`, `sightseeing`, `restaurant`]
+const SortType = {
+  EVENT: `event`,
+  TIME: `time`,
+  PRICE: `price`
+};
+
+const eventTypes = {
+  transfer: [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`],
+  activity: [`check-in`, `sightseeing`, `restaurant`]
 };
 
 const cities = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
@@ -30,6 +36,24 @@ const groupToPretext = {
   transfer: `to`,
   activity: `in`
 };
+
+const sortTypes = [
+  {
+    name: SortType.EVENT,
+    direction: false,
+    isApply: true
+  },
+  {
+    name: SortType.TIME,
+    direction: `descend`,
+    isApply: false
+  },
+  {
+    name: SortType.PRICE,
+    direction: `descend`,
+    isApply: false
+  }
+];
 
 const newPoint = {
   id: null,
@@ -48,4 +72,4 @@ const newPoint = {
 };
 
 
-export {POINT_COUNT, LOCALE, Format, EventTypes, groupToPretext, cities, newPoint};
+export {POINT_COUNT, LOCALE, Format, SortType, eventTypes, groupToPretext, cities, sortTypes, newPoint};
