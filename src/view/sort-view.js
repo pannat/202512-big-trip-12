@@ -1,10 +1,22 @@
 import AbstractView from "./abstract-view";
 import {getUpperFirst} from "../utils";
 
-class SortingView extends AbstractView {
+class SortView extends AbstractView {
   constructor(sortingTypes) {
     super();
     this._sortingTypes = sortingTypes;
+
+    this._onSortChange = this._sortTypeChangeHandler.bind(this);
+  }
+
+  setSortTypeChangeHandler(callback) {
+    this._callback.sortChange = callback;
+    this.getElement().addEventListener(`change`, this._onSortChange);
+  }
+
+  _sortTypeChangeHandler(evt) {
+    evt.preventDefault();
+    this._callback.sortChange(evt.target.dataset.sortType);
   }
 
   _getTemplate() {
@@ -12,6 +24,7 @@ class SortingView extends AbstractView {
               <span class="trip-sort__item  trip-sort__item--day">Day</span>
               ${this._sortingTypes.map((type) => `<div class="trip-sort__item  trip-sort__item--${type.name}">
                 <input id="sort-${type.name}"
+                  data-sort-type="${type.name}"
                   class="trip-sort__input visually-hidden"
                   type="radio" name="trip-sort"
                   value="sort-${type.name}"
@@ -30,4 +43,4 @@ class SortingView extends AbstractView {
   }
 }
 
-export default SortingView;
+export default SortView;

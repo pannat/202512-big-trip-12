@@ -1,8 +1,7 @@
 import NavView from "./view/nav-view";
 import FiltersView from "./view/filters-view";
-import SortingView from "./view/sorting-view";
 import {render, POINT_COUNT, RenderPosition} from "./utils";
-import {generatePoint, filterList, sortingTypes} from "./mock";
+import {generatePoint, filterList} from "./mock";
 import TripInfo from "./presenter/trip-info";
 import Trip from "./presenter/trip";
 
@@ -22,8 +21,3 @@ const nav = new NavView();
 const filters = new FiltersView(filterList);
 render(controlsElement, nav.getElement(), RenderPosition.BEFORE_END);
 render(controlsElement, filters.getElement(), RenderPosition.BEFORE_END);
-
-if (points.length) {
-  const sorting = new SortingView(sortingTypes);
-  render(pointsContainerElement, sorting.getElement(), RenderPosition.BEFORE_END);
-}
