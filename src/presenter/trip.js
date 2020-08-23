@@ -1,16 +1,18 @@
-import DaysView from "../view/days-view";
-import {RenderPosition, SortType, LOCALE, sortTypes, replace, render} from "../utils";
-import PointView from "../view/point-view";
-import PointEditView from "../view/point-edit-view";
-import NoPointsView from "../view/no-points-view";
-import SortView from "../view/sort-view";
+import Days from "../view/days";
+import {RenderPosition, SortType, LOCALE, sortTypes, render, remove, updateItem} from "../utils";
+import NoPoints from "../view/no-points";
+import Sort from "../view/sort";
+import PointPresenter from "./point";
 
 class Trip {
   constructor(container) {
     this._container = container;
-    this._handleSortPoints = this._handleSortPoints.bind(this);
     this._points = null;
     this._currentSortType = SortType.EVENT;
+    this._pointPresenter = {};
+
+    this._handleSortPoints = this._handleSortPoints.bind(this);
+    this._handlePointChange = this._handlePointChange.bind(this);
   }
 
   init(points) {
@@ -49,55 +51,37 @@ class Trip {
       if (days.length > 1) {
         pointsForDay = this._points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === days[i].toLocaleDateString(LOCALE));
       }
-      pointsForDay.forEach((point) => this._renderPoint(element, point));
+      pointsForDay.forEach((point) => {
+        const pointPresenter = new PointPresenter(element, this._handlePointChange);
+        pointPresenter.init(point);
+        this._pointPresenter[point.id] = pointPresenter;
+      });
     });
   }
 
   _renderDays(days) {
-    this._daysView = new DaysView(days);
+    this._daysView = new Days(days);
     render(this._container, this._daysView, RenderPosition.BEFORE_END);
   }
 
-  _renderPoint(container, point) {
-    const pointView = new PointView(point);
-    const pointEditView = new PointEditView(point);
-
-    const replaceFormToCard = () => {
-      replace(pointView, pointEditView);
-      pointView.setOnButtonClick(replaceCardToForm);
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    };
-
-    const replaceCardToForm = () => {
-      replace(pointEditView, pointView);
-      pointEditView.setOnSubmitForm(replaceFormToCard);
-      document.addEventListener(`keydown`, onEscKeyDown);
-    };
-
-    const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        evt.preventDefault();
-        replaceFormToCard();
-      }
-    };
-
-    render(container, pointView, RenderPosition.BEFORE_END);
-    pointView.setOnButtonClick(replaceCardToForm);
-  }
-
   _renderNoPoints() {
-    const noPointsView = new NoPointsView();
+    const noPointsView = new NoPoints();
     render(this._container, noPointsView, RenderPosition.BEFORE_END);
   }
 
   _renderSort() {
-    const sort = new SortView(sortTypes);
+    const sort = new Sort(sortTypes);
     render(this._container, sort, RenderPosition.BEFORE_END);
     sort.setSortTypeChangeHandler(this._handleSortPoints);
   }
 
   _clearTrip() {
-    this._daysView.getElement().innerHTML = ``;
+    remove(this._daysView);
+
+    Object
+      .values(this._pointPresenter)
+      .forEach((presenter) => presenter.destroy());
+    this._pointPresenter = {};
   }
 
   _handleSortPoints(sortType) {
@@ -121,6 +105,11 @@ class Trip {
     if (this._points.length) {
       this._renderTrip();
     }
+  }
+
+  _handlePointChange(updatedPoint) {
+    this._points = updateItem(this._points, updatedPoint);
+    this._pointPresenter[updatedPoint.id].init(updatedPoint);
   }
 }
 

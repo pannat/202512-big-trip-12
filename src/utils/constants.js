@@ -55,21 +55,4 @@ const sortTypes = [
   }
 ];
 
-const newPoint = {
-  id: null,
-  type: ``,
-  price: null,
-  dates: {
-    startDate: new Date(),
-    endDate: new Date()
-  },
-  destination: {
-    name: ``,
-    description: ``,
-    photos: []
-  },
-  offers: []
-};
-
-
-export {POINT_COUNT, LOCALE, Format, SortType, eventTypes, groupToPretext, cities, sortTypes, newPoint};
+export {POINT_COUNT, LOCALE, Format, SortType, eventTypes, groupToPretext, cities, sortTypes};

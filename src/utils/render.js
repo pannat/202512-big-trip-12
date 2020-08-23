@@ -1,4 +1,4 @@
-import AbstractView from "../view/abstract-view";
+import Abstract from "../view/abstract";
 
 const RenderPosition = {
   AFTER_BEGIN: `afterbegin`,
@@ -6,11 +6,11 @@ const RenderPosition = {
 };
 
 const render = (container, child, place) => {
-  if (container instanceof AbstractView) {
+  if (container instanceof Abstract) {
     container = container.getElement();
   }
 
-  if (child instanceof AbstractView) {
+  if (child instanceof Abstract) {
     child = child.getElement();
   }
 
@@ -25,7 +25,7 @@ const render = (container, child, place) => {
 };
 
 const renderTemplate = (container, template, place) => {
-  if (container instanceof AbstractView) {
+  if (container instanceof Abstract) {
     container = container.getElement();
   }
 
@@ -40,11 +40,11 @@ const createElement = (template) => {
 };
 
 const replace = (newChild, oldChild) => {
-  if (newChild instanceof AbstractView) {
+  if (newChild instanceof Abstract) {
     newChild = newChild.getElement();
   }
 
-  if (oldChild instanceof AbstractView) {
+  if (oldChild instanceof Abstract) {
     oldChild = oldChild.getElement();
   }
 
@@ -58,7 +58,7 @@ const replace = (newChild, oldChild) => {
 };
 
 const remove = (component) => {
-  if (!(component instanceof AbstractView)) {
+  if (!(component instanceof Abstract)) {
     throw new Error(`Can remove only components`);
   }
 

@@ -83,17 +83,18 @@ const generateOffers = (offers) => {
   }));
 };
 
-let i = -1;
+const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
 
 const generatePartPoint = () => ({
-  id: ++i,
+  id: generateId(),
   destination: {
     name: destinations[getRandomInt(0, destinations.length - 1)],
     description: getRandomArray(sentences, sentences.length).join(`. `),
     photos: generatePhotos()
   },
   price: getRandomInt(20, 400),
-  dates: generateDate()
+  dates: generateDate(),
+  isFavorite: !!getRandomInt()
 });
 
 const generatePoint = () => {
