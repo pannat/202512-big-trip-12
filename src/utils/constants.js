@@ -25,18 +25,6 @@ const SortType = {
   PRICE: `price`
 };
 
-const eventTypes = {
-  transfer: [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`],
-  activity: [`check-in`, `sightseeing`, `restaurant`]
-};
-
-const cities = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
-
-const groupToPretext = {
-  transfer: `to`,
-  activity: `in`
-};
-
 const sortTypes = [
   {
     name: SortType.EVENT,
@@ -55,4 +43,4 @@ const sortTypes = [
   }
 ];
 
-export {POINT_COUNT, LOCALE, Format, SortType, eventTypes, groupToPretext, cities, sortTypes};
+export {POINT_COUNT, LOCALE, Format, SortType, sortTypes};

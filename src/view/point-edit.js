@@ -1,5 +1,6 @@
-import {groupToPretext, cities, eventTypes, getUpperFirst} from "../utils";
+import {cities, eventTypes, getUpperFirst, calculateGroup, groupToPretext} from "../utils";
 import SmartView from "./smart";
+import {additionalOptions} from "../mock";
 
 const POINT_BLANK = {
   id: null,
@@ -55,7 +56,7 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                 <input class="event__input  event__input--destination"
                     id="event-destination-${key}"
                     type="text" name="event-destination"
-                    value="${destination.name}"
+                    value="${destination.name ? destination.name : ``}"
                     list="destination-list-${key}"
                 >
                 <datalist id="destination-list-${key}">
@@ -151,7 +152,7 @@ class PointEdit extends SmartView {
   constructor(point = POINT_BLANK) {
     super();
     this._data = PointEdit.parsePointToData(point);
-    this._onFormSubmit = this._onFormSubmit.bind(this);
+    this._sourcedData = Object.assign({}, this._data, this._data.offers, this._data.destination);
     this._onButtonCloseClick = this._onButtonCloseClick.bind(this);
     this._onFavoriteChange = this._onFavoriteChange.bind(this);
     this._onTypeChange = this._onTypeChange.bind(this);
@@ -174,6 +175,10 @@ class PointEdit extends SmartView {
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._onButtonCloseClick);
     this.getElement().querySelector(`.event__favorite-checkbox`).addEventListener(`change`, this._onFavoriteChange);
     this.getElement().addEventListener(`change`, this._onTypeChange);
+  }
+
+  reset() {
+    this.updateData(Object.assign(this._sourcedData));
   }
 
   _getTemplate() {
@@ -200,7 +205,11 @@ class PointEdit extends SmartView {
       return;
     }
 
-    this.updateData({type: evt.target.value});
+    this.updateData({
+      type: evt.target.value,
+      pretext: groupToPretext[calculateGroup(evt.target.value)],
+      offers: additionalOptions[calculateGroup(evt.target.value)]
+    });
   }
 
   static parsePointToData(point) {
@@ -210,7 +219,7 @@ class PointEdit extends SmartView {
         {
           isNew: point.id === null,
           key: point.id === null ? `new` : point.id,
-          pretext: groupToPretext[point.group]
+          pretext: groupToPretext[calculateGroup(point.type)]
         }
     );
   }

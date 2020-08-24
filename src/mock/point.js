@@ -6,25 +6,35 @@ const additionalOptions = {
   transfer: [
     {
       name: `luggage`,
-      displayName: `add luggage`
+      displayName: `add luggage`,
+      price: getRandomInt(10, 220),
+      isApply: false
     },
     {
       name: `comfort`,
-      displayName: `switch to comfort class`
+      displayName: `switch to comfort class`,
+      price: getRandomInt(10, 220),
+      isApply: false
     }
   ],
   activity: [
     {
       name: `meal`,
-      displayName: `add meal`
+      displayName: `add meal`,
+      price: getRandomInt(10, 220),
+      isApply: false
     },
     {
       name: `seats`,
-      displayName: `choose seats`
+      displayName: `choose seats`,
+      price: getRandomInt(10, 220),
+      isApply: false
     },
     {
       name: `train`,
-      displayName: `travel by train`
+      displayName: `travel by train`,
+      price: getRandomInt(10, 220),
+      isApply: false
     }
   ]
 };
@@ -113,5 +123,5 @@ const generatePoint = () => {
   return point;
 };
 
-export {generatePoint};
+export {generatePoint, additionalOptions};
 

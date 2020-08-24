@@ -12,6 +12,7 @@ class PointPresenter {
     this._replaceCardToForm = this._replaceCardToForm.bind(this);
     this._replaceFormToCard = this._replaceFormToCard.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._onEscKeyDown = this._onEscKeyDown.bind(this);
   }
 
   init(point) {
@@ -54,9 +55,10 @@ class PointPresenter {
     replace(this._pointEditView, this._pointView);
     this._pointEditView.restoreHandlers();
     document.addEventListener(`keydown`, this._onEscKeyDown);
-  };
+  }
 
   _replaceFormToCard() {
+    this._pointEditView.reset();
     replace(this._pointView, this._pointEditView);
     this._pointView.restoreHandlers();
     document.removeEventListener(`keydown`, this._onEscKeyDown);
