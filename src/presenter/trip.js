@@ -9,10 +9,11 @@ class Trip {
     this._container = container;
     this._points = null;
     this._currentSortType = SortType.EVENT;
-    this._pointPresenter = {};
+    this._pointPresenter = new Map();
 
     this._handleSortPoints = this._handleSortPoints.bind(this);
     this._handlePointChange = this._handlePointChange.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
   }
 
   init(points) {
@@ -52,9 +53,9 @@ class Trip {
         pointsForDay = this._points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === days[i].toLocaleDateString(LOCALE));
       }
       pointsForDay.forEach((point) => {
-        const pointPresenter = new PointPresenter(element, this._handlePointChange);
+        const pointPresenter = new PointPresenter(element, this._handlePointChange, this._handleModeChange);
         pointPresenter.init(point);
-        this._pointPresenter[point.id] = pointPresenter;
+        this._pointPresenter.set(Symbol(point.id), pointPresenter);
       });
     });
   }
@@ -110,6 +111,12 @@ class Trip {
   _handlePointChange(updatedPoint) {
     this._points = updateItem(this._points, updatedPoint);
     this._pointPresenter[updatedPoint.id].init(updatedPoint);
+  }
+
+  _handleModeChange() {
+    this._pointPresenter.forEach((presenter) => {
+      presenter.resetView();
+    });
   }
 }
 

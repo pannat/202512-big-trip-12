@@ -18,17 +18,7 @@ const POINT_BLANK = {
   offers: []
 };
 
-const createPointTemplate = ({type, pretext, destination, dates, price, offers, isFavorite, key, isNew}) => `
-          <form class="trip-events__item  event  event--edit" action="#" method="post">
-            <header class="event__header">
-              <div class="event__type-wrapper">
-                <label class="event__type  event__type-btn" for="event-type-toggle-${key}">
-                  <span class="visually-hidden">Choose event type</span>
-                  <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
-                </label>
-                <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${key}" type="checkbox">
-
-                <div class="event__type-list">
+const createEventTypesListTemplate = (currentType, key) => `
                   ${Object.keys(eventTypes).map((eventGroup) => `<fieldset class="event__type-group">
                     <legend class="visually-hidden">${getUpperFirst(eventGroup.toLowerCase())}</legend>
                     ${eventTypes[eventGroup].map((eventType) => `
@@ -39,13 +29,74 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                         type="radio"
                         name="event-type"
                         value="${eventType}"
-                        ${eventType === type ? `checked` : ``}
+                        ${eventType === currentType ? `checked` : ``}
                         >
                       <label class="event__type-label  event__type-label--${eventType}" for="event-type-${eventType}-${key}">
                         ${getUpperFirst(eventType)}
                       </label>
                     </div>`).join(``)}
-                  </fieldset>`).join(``)}
+                  </fieldset>`)
+                  .join(``)
+                  .trim()}`;
+
+const createOffersTemplate = (offers, key) => {
+  if (!offers || !offers.length) {
+    return ``;
+  }
+
+  return `<section class="event__section  event__section--offers">
+                <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+                 <div class="event__available-offers">
+                  ${offers.map((offer) => `<div class="event__offer-selector">
+                                    <input
+                                        class="event__offer-checkbox  visually-hidden"
+                                        id="event-offer-${offer.name}-${key}"
+                                        type="checkbox"
+                                        name="event-offer-${offer.name}"
+                                        ${offer.isApply ? `checked` : ``}>
+                                    <label class="event__offer-label" for="event-offer-${offer.name}-${key}">
+                                      <span class="event__offer-title">${getUpperFirst(offer.displayName)}</span>
+                                      &plus;
+                                      &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
+                                    </label>
+                                  </div>`)
+                    .join(``)}
+                </div>
+              </section>`;
+};
+
+const createDestinationTemplate = (destination) => {
+  if (!destination || !destination.name.trim()) {
+    return ``;
+  }
+
+  return `<section class="event__section  event__section--destination">
+            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+            <p class="event__destination-description">${destination.description}</p>
+            <div class="event__photos-container">
+              <div class="event__photos-tape">
+                ${destination.photos.map((photo) => `<img class="event__photo" src="${photo}" alt="Event photo">`).join(``)}
+              </div>
+            </div>
+          </section>`;
+};
+
+const createPointTemplate = ({type, pretext, destination, dates, price, offers, isFavorite, key, isNew}) => {
+  const eventTypeListTemplate = createEventTypesListTemplate(type, key);
+  const offersTemplate = createOffersTemplate(offers, key);
+  const destinationTemplate = createDestinationTemplate(destination);
+
+  return `<form class="trip-events__item  event  event--edit" action="#" method="post">
+            <header class="event__header">
+              <div class="event__type-wrapper">
+                <label class="event__type  event__type-btn" for="event-type-toggle-${key}">
+                  <span class="visually-hidden">Choose event type</span>
+                  <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
+                </label>
+                <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${key}" type="checkbox">
+
+                <div class="event__type-list">
+                  ${eventTypeListTemplate}
                 </div>
               </div>
 
@@ -115,37 +166,13 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                 <span class="visually-hidden">Close event</span>
               </button>`}
             </header>
-            ${offers.length || destination.name ? `<section class="event__details">
-                ${offers.length ? `<section class="event__section  event__section--offers">
-                <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-                 <div class="event__available-offers">
-                  ${offers.map((offer) => `<div class="event__offer-selector">
-                    <input
-                        class="event__offer-checkbox  visually-hidden"
-                        id="event-offer-${offer.name}-${key}"
-                        type="checkbox"
-                        name="event-offer-${offer.name}"
-                        ${offer.isApply ? `checked` : ``}>
-                    <label class="event__offer-label" for="event-offer-${offer.name}-${key}">
-                      <span class="event__offer-title">${getUpperFirst(offer.displayName)}</span>
-                      &plus;
-                      &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
-                    </label>
-                  </div>`).join(``)}
-                </div>` : ``}
-              </section>
-              ${destination.name ? `
-              <section class="event__section  event__section--destination">
-                <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-                <p class="event__destination-description">${destination.description}</p>
-                <div class="event__photos-container">
-                  <div class="event__photos-tape">
-                    ${destination.photos.map((photo) => `<img class="event__photo" src="${photo}" alt="Event photo">`).join(``)}
-                  </div>
-                </div>
-              </section>` : ``}` : ``}
-            </section>
+            ${offers.length || destination.name ? `
+            <section class="event__details">
+                ${offersTemplate}
+                ${destinationTemplate}
+            </section>` : ``}
           </form>`.trim();
+};
 
 
 class PointEdit extends SmartView {
@@ -156,6 +183,7 @@ class PointEdit extends SmartView {
     this._onButtonCloseClick = this._onButtonCloseClick.bind(this);
     this._onFavoriteChange = this._onFavoriteChange.bind(this);
     this._onTypeChange = this._onTypeChange.bind(this);
+    this._onDestinationChange = this._onDestinationChange.bind(this);
   }
 
   setOnFormSubmit(callback) {
@@ -175,6 +203,7 @@ class PointEdit extends SmartView {
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._onButtonCloseClick);
     this.getElement().querySelector(`.event__favorite-checkbox`).addEventListener(`change`, this._onFavoriteChange);
     this.getElement().addEventListener(`change`, this._onTypeChange);
+    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._onDestinationChange);
   }
 
   reset() {
@@ -209,6 +238,16 @@ class PointEdit extends SmartView {
       type: evt.target.value,
       pretext: groupToPretext[calculateGroup(evt.target.value)],
       offers: additionalOptions[calculateGroup(evt.target.value)]
+    });
+  }
+
+  _onDestinationChange(evt) {
+    this.updateData({
+      destination: {
+        name: evt.target.value,
+        description: `New new new`,
+        photos: []
+      }
     });
   }
 

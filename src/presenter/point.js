@@ -2,13 +2,20 @@ import Point from "../view/point";
 import PointEdit from "../view/point-edit";
 import {render, RenderPosition, replace, remove} from "../utils";
 
+const Mode = {
+  DEFAULT: `DEFAULT`,
+  EDITING: `EDITING`
+};
+
 class PointPresenter {
-  constructor(container, changePoint) {
+  constructor(container, changePoint, changeMode) {
     this._container = container;
 
     this._pointView = null;
     this._pointEditView = null;
+    this._mode = Mode.DEFAULT;
     this._changePoint = changePoint;
+    this._changeMode = changeMode;
     this._replaceCardToForm = this._replaceCardToForm.bind(this);
     this._replaceFormToCard = this._replaceFormToCard.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
@@ -35,12 +42,12 @@ class PointPresenter {
       return;
     }
 
-    if (this._container.contains(prevPointView.getElement())) {
+    if (this._mode === Mode.DEFAULT) {
       replace(this._pointView, prevPointView);
       this._pointView.restoreHandlers();
     }
 
-    if (this._container.contains(prevPointEditView.getElement())) {
+    if (this._mode === Mode.EDITING) {
       replace(this._pointEditView, prevPointEditView);
       this._pointEditView.restoreHandlers();
     }
@@ -51,10 +58,18 @@ class PointPresenter {
     remove(this._pointEditView);
   }
 
+  resetView() {
+    if (this._mode === Mode.EDITING) {
+      this._replaceFormToCard();
+    }
+  }
+
   _replaceCardToForm() {
     replace(this._pointEditView, this._pointView);
     this._pointEditView.restoreHandlers();
     document.addEventListener(`keydown`, this._onEscKeyDown);
+    this._changeMode();
+    this._mode = Mode.EDITING;
   }
 
   _replaceFormToCard() {
@@ -62,6 +77,7 @@ class PointPresenter {
     replace(this._pointView, this._pointEditView);
     this._pointView.restoreHandlers();
     document.removeEventListener(`keydown`, this._onEscKeyDown);
+    this._mode = Mode.DEFAULT;
   }
 
   _handleFavoriteClick() {
