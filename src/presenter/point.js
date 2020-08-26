@@ -73,7 +73,7 @@ class PointPresenter {
   }
 
   _replaceFormToCard() {
-    this._pointEditView.reset();
+    this._pointEditView.reset(this._point);
     replace(this._pointView, this._pointEditView);
     this._pointView.restoreHandlers();
     document.removeEventListener(`keydown`, this._onEscKeyDown);
