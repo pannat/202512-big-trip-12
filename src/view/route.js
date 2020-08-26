@@ -1,7 +1,12 @@
-import AbstractView from "./abstract-view";
+import AbstractView from "./abstract";
 import {getFormattedDate, Format} from "../utils";
 
-class RouteView extends AbstractView {
+const createRouteTemplate = (title, dates) => `<div class="trip-info__main">
+              <h1 class="trip-info__title">${title}</h1>
+              <p class="trip-info__dates">${dates}</p>
+            </div>`.trim();
+
+class Route extends AbstractView {
   constructor(cities, dates) {
     super();
     this._cities = cities;
@@ -22,12 +27,9 @@ class RouteView extends AbstractView {
   }
 
   _getTemplate() {
-    return `<div class="trip-info__main">
-              <h1 class="trip-info__title">${this._getTitle()}</h1>
-              <p class="trip-info__dates">${this._getDates()}</p>
-            </div>`.trim();
+    return createRouteTemplate(this._getTitle(this._cities), this._getDates(this._dates));
   }
 }
 
-export default RouteView;
+export default Route;
 

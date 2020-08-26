@@ -1,15 +1,9 @@
-import AbstractView from "./abstract-view";
+import AbstractView from "./abstract";
 import {getUpperFirst} from "../utils";
 
-class FiltersView extends AbstractView {
-  constructor(filterList) {
-    super();
-    this._filterList = filterList;
-  }
-
-  _getTemplate() {
-    return `<form class="trip-filters" action="#" method="get">
-                ${this._filterList.map((filter) => `<div class="trip-filters__filter">
+const createFiltersTemplate = (filterList) =>`
+              <form class="trip-filters" action="#" method="get">
+                ${filterList.map((filter) => `<div class="trip-filters__filter">
                   <input id="filter-${filter.name}"
                   class="trip-filters__filter-input visually-hidden"
                   type="radio"
@@ -22,8 +16,17 @@ class FiltersView extends AbstractView {
 
                 <button class="visually-hidden" type="submit">Accept filter</button>
               </form>`.trim();
+
+class Filters extends AbstractView {
+  constructor(filterList) {
+    super();
+    this._filterList = filterList;
+  }
+
+  _getTemplate() {
+    return createFiltersTemplate(this._filterList);
   }
 }
 
-export default FiltersView;
+export default Filters;
 

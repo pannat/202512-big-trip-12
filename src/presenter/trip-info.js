@@ -1,6 +1,6 @@
-import TripInfoView from "../view/trip-info-view";
+import TripInfoView from "../view/trip-info";
 import {render, RenderPosition} from "../utils";
-import RouteView from "../view/route-view";
+import Route from "../view/route";
 
 class TripInfo {
   constructor(container) {
@@ -18,7 +18,7 @@ class TripInfo {
     const routeDates = this._getRouteDates();
     const tripInfoView = new TripInfoView(totalPrice);
     render(this._container, tripInfoView, RenderPosition.AFTER_BEGIN);
-    const routeView = new RouteView(cities, routeDates);
+    const routeView = new Route(cities, routeDates);
     render(tripInfoView, routeView, RenderPosition.AFTER_BEGIN);
   }
 
