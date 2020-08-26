@@ -79,10 +79,8 @@ class Trip {
   _clearTrip() {
     remove(this._daysView);
 
-    Object
-      .values(this._pointPresenter)
-      .forEach((presenter) => presenter.destroy());
-    this._pointPresenter = {};
+    this._pointPresenter.forEach((presenter) => presenter.destroy());
+    this._pointPresenter.clear();
   }
 
   _handleSortPoints(sortType) {
