@@ -10,8 +10,8 @@ const getRandomInt = (a = 1, b = 0) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-const getFormattedDate = (date, format, isDate = true) => {
-  return isDate ? date.toLocaleDateString(LOCALE, format) : date.toLocaleTimeString(LOCALE, format);
+const getFormattedDate = (date, format) => {
+  return date.toLocaleDateString(LOCALE, format);
 };
 
 const updateItem = (items, update) => {

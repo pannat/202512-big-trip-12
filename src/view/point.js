@@ -1,7 +1,8 @@
-import {getUpperFirst, getFormattedDate, Format, calculateGroup, groupToPretext} from "../utils";
+import moment from "moment";
+import {getUpperFirst, calculateGroup, groupToPretext} from "../utils";
 import AbstractView from "./abstract";
 
-const createPointTemplate = (type, pretext, destination, startDate, endDate, price, offers) => `
+const createPointTemplate = (type, pretext, destination, startDate, endDate, duration, price, offers) => `
                 <li class="trip-events__item">
                   <div class="event">
                     <div class="event__type">
@@ -11,11 +12,11 @@ const createPointTemplate = (type, pretext, destination, startDate, endDate, pri
 
                     <div class="event__schedule">
                       <p class="event__time">
-                        <time class="event__start-time" datetime="${startDate.toISOString()}">${getFormattedDate(startDate, Format.TIME, false)}</time>
+                        <time class="event__start-time" datetime="${startDate.toISOString()}">${startDate.format(`hh:mm`)}</time>
                         &mdash;
-                        <time class="event__end-time" datetime="${endDate.toISOString()}">${getFormattedDate(endDate, Format.TIME, false)}</time>
+                        <time class="event__end-time" datetime="${endDate.toISOString()}">${endDate.format(`hh:mm`)}</time>
                       </p>
-                      <p class="event__duration">30M</p>
+                      <p class="event__duration">${duration}</p>
                     </div>
 
                     <p class="event__price">
@@ -43,14 +44,13 @@ class Point extends AbstractView {
     this._type = type;
     this._pretext = groupToPretext[calculateGroup(type)];
     this._destination = destination;
-    this._startDate = dates.startDate;
-    this._endDate = dates.endDate;
+    this._startDate = moment(dates.startDate);
+    this._endDate = moment(dates.endDate);
+    this._duration = this._calculateDuration();
     this._price = price;
     this._offers = offers;
-
     this._onButtonClick = this._onButtonClick.bind(this);
   }
-
   setOnButtonClick(callback) {
     this._callback.clickButton = callback;
   }
@@ -60,8 +60,29 @@ class Point extends AbstractView {
   }
 
   _getTemplate() {
-    return createPointTemplate(this._type, this._pretext, this._destination, this._startDate, this._endDate, this._price, this._offers);
+    return createPointTemplate(this._type, this._pretext, this._destination, this._startDate, this._endDate, this._duration, this._price, this._offers);
   }
+
+  _calculateDuration() {
+    const setFormatUnitTime = (unit) => unit > 9 ? unit : `0${unit}`;
+    const diff = this._endDate.diff(this._startDate);
+
+    const days = setFormatUnitTime(moment.duration(diff).days());
+    const hours = setFormatUnitTime(moment.duration(diff).hours());
+    const minutes = setFormatUnitTime(moment.duration(diff).minutes());
+
+    let duration = ``;
+
+    if (days) {
+      duration += `${days}D ${hours}H`;
+    } else {
+      duration += `${hours}H`;
+    }
+    duration += ` ${minutes}M`;
+
+    return duration;
+  }
+
 
   _onButtonClick(evt) {
     evt.preventDefault();

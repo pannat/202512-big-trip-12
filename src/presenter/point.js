@@ -30,13 +30,12 @@ class PointPresenter {
 
     this._pointView = new Point(this._point);
     this._pointEditView = new PointEdit(this._point);
+    this._pointEditView.setOnFormSubmit(this._replaceFormToCard);
+    this._pointEditView.setOnButtonCloseClick(this._replaceFormToCard);
+    this._pointEditView.setOnFavoriteChange(this._handleFavoriteClick);
+    this._pointView.setOnButtonClick(this._replaceCardToForm);
 
     if (!prevPointView || !prevPointEditView) {
-      this._pointEditView.setOnFormSubmit(this._replaceFormToCard);
-      this._pointEditView.setOnButtonCloseClick(this._replaceFormToCard);
-      this._pointEditView.setOnFavoriteChange(this._handleFavoriteClick);
-      this._pointView.setOnButtonClick(this._replaceCardToForm);
-
       render(this._container, this._pointView, RenderPosition.BEFORE_END);
       this._pointView.restoreHandlers();
       return;
@@ -73,7 +72,7 @@ class PointPresenter {
   }
 
   _replaceFormToCard() {
-    this._pointEditView.reset();
+    this._pointEditView.reset(this._point);
     replace(this._pointView, this._pointEditView);
     this._pointView.restoreHandlers();
     document.removeEventListener(`keydown`, this._onEscKeyDown);
@@ -81,7 +80,7 @@ class PointPresenter {
   }
 
   _handleFavoriteClick() {
-    this._changePoint(Object.assign({}, this._point, {isFavorite: this._point.isFavorite}));
+    this._changePoint(Object.assign({}, this._point, {isFavorite: !this._point.isFavorite}));
   }
 
   _onEscKeyDown(evt) {

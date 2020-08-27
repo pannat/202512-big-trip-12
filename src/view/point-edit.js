@@ -1,5 +1,9 @@
 import {cities, eventTypes, getUpperFirst, calculateGroup, groupToPretext} from "../utils";
 import SmartView from "./smart";
+
+import flatpickr from "flatpickr";
+import "../../node_modules/flatpickr/dist/flatpickr.min.css";
+
 import {additionalOptions} from "../mock";
 
 const POINT_BLANK = {
@@ -17,6 +21,8 @@ const POINT_BLANK = {
   },
   offers: []
 };
+
+const FORMAT_DATEPICKER = `d/j/Y H:S`;
 
 const createEventTypesListTemplate = (currentType, key) => `
                   ${Object.keys(eventTypes).map((eventGroup) => `<fieldset class="event__type-group">
@@ -167,23 +173,29 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
               </button>`}
             </header>
             ${offers.length || destination.name ? `
-            <section class="event__details">
-                ${offersTemplate}
-                ${destinationTemplate}
-            </section>` : ``}
+              <section class="event__details">
+                  ${offersTemplate}
+                  ${destinationTemplate}
+              </section>` : ``}
           </form>`.trim();
 };
-
 
 class PointEdit extends SmartView {
   constructor(point = POINT_BLANK) {
     super();
     this._data = PointEdit.parsePointToData(point);
-    this._sourcedData = Object.assign({}, this._data, this._data.offers, this._data.destination);
+    this._datepicker = {
+      startDate: null,
+      endDate: null
+    };
     this._onButtonCloseClick = this._onButtonCloseClick.bind(this);
     this._onFavoriteChange = this._onFavoriteChange.bind(this);
     this._onTypeChange = this._onTypeChange.bind(this);
     this._onDestinationChange = this._onDestinationChange.bind(this);
+    this._onStartDatePickerChange = this._onStartDatePickerChange.bind(this);
+    this._onEndDatePickerChange = this._onEndDatePickerChange.bind(this);
+
+    this._setInnerHandlers();
   }
 
   setOnFormSubmit(callback) {
@@ -199,19 +211,54 @@ class PointEdit extends SmartView {
   }
 
   restoreHandlers() {
+    this._setInnerHandlers();
+    this._setDatepickers();
     this.getElement().addEventListener(`submit`, this._onFormSubmit);
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._onButtonCloseClick);
     this.getElement().querySelector(`.event__favorite-checkbox`).addEventListener(`change`, this._onFavoriteChange);
-    this.getElement().addEventListener(`change`, this._onTypeChange);
-    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._onDestinationChange);
   }
 
-  reset() {
-    this.updateData(Object.assign(this._sourcedData));
+  reset(point) {
+    this.updateData(PointEdit.parsePointToData(point));
   }
 
   _getTemplate() {
     return createPointTemplate(this._data);
+  }
+
+  _setDatepickers() {
+    Object.values(this._datepicker)
+      .forEach((picker) => {
+        if (picker) {
+          picker.destroy();
+          picker = null;
+        }
+      });
+
+    this._datepicker.startDate = flatpickr(
+        this.getElement().querySelector(`[name="event-start-time"]`),
+        {
+          dateFormat: FORMAT_DATEPICKER,
+          enableTime: true,
+          defaultDate: this._data.dates.startDate,
+          onChange: this._onStartDatePickerChange
+        }
+    );
+
+    this._datepicker.endDate = flatpickr(
+        this.getElement().querySelector(`[name="event-end-time"]`),
+        {
+          dateFormat: FORMAT_DATEPICKER,
+          enableTime: true,
+          defaultDate: this._data.dates.endDate,
+          onChange: this._onEndDatePickerChange
+        }
+    );
+  }
+
+  _setInnerHandlers() {
+    this.getElement().addEventListener(`change`, this._onTypeChange);
+    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._onDestinationChange);
   }
 
   _onFormSubmit(evt) {
@@ -222,6 +269,10 @@ class PointEdit extends SmartView {
   _onButtonCloseClick(evt) {
     evt.preventDefault();
     this._callback.closeButtonClick();
+    Object.values(this._datepicker).forEach((datepicker) => {
+      datepicker.destroy();
+      datepicker = null;
+    });
   }
 
   _onFavoriteChange(evt) {
@@ -249,6 +300,24 @@ class PointEdit extends SmartView {
         photos: []
       }
     });
+  }
+
+  _onStartDatePickerChange(value) {
+    this.updateData({
+      dates: {
+        startDate: value,
+        endDate: this._data.dates.endDate
+      },
+    }, true);
+  }
+
+  _onEndDatePickerChange(value) {
+    this.updateData({
+      dates: {
+        startDate: this._data.dates.startDate,
+        endDate: value
+      },
+    }, true);
   }
 
   static parsePointToData(point) {

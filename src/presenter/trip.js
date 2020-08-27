@@ -108,7 +108,6 @@ class Trip {
 
   _handlePointChange(updatedPoint) {
     this._points = updateItem(this._points, updatedPoint);
-    this._pointPresenter[updatedPoint.id].init(updatedPoint);
   }
 
   _handleModeChange() {
