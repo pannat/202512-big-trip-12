@@ -1,5 +1,4 @@
 import {getRandomInt} from "../utils";
-import moment from "moment";
 
 const destinations = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
 
