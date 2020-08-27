@@ -1,4 +1,5 @@
 import {getRandomInt} from "../utils";
+import moment from "moment";
 
 const destinations = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
 
@@ -73,10 +74,10 @@ const generateDate = () => {
   startDate.setHours(getRandomInt(0, 23), getRandomInt(0, 59), getRandomInt(0, 59), getRandomInt(0, 999));
   startDate.setDate(startDate.getDate() + daysGap);
 
-  const diff = getRandomInt(1, 7);
+  const diff = getRandomInt(8, 10);
   const endDate = new Date();
   endDate.setHours(getRandomInt(0, 23), getRandomInt(0, 59), getRandomInt(0, 59), getRandomInt(0, 999));
-  endDate.setDate(startDate.getDate() + diff);
+  endDate.setDate(endDate.getDate() + diff);
 
   return {
     startDate,

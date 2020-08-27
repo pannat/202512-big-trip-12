@@ -3,19 +3,9 @@ const POINT_COUNT = 20;
 const LOCALE = `en-US`;
 
 const Format = {
-  DATE_LONG: {
-    year: `numeric`,
-    month: `numeric`,
-    day: `numeric`
-  },
   DATE_SHORT: {
     day: `numeric`,
     month: `short`
-  },
-  TIME: {
-    hour: `numeric`,
-    minute: `numeric`,
-    hour12: false
   }
 };
 

@@ -16,6 +16,7 @@ tripInfoPresenter.init(points);
 
 const tripPresenter = new TripPresenter(pointsContainerElement);
 tripPresenter.init(points);
+console.log(points)
 
 const nav = new NavView();
 const filters = new FiltersView(filterList);
