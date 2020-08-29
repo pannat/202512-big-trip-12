@@ -1,6 +1,7 @@
 import Point from "../view/point";
 import PointEdit from "../view/point-edit";
-import {render, RenderPosition, replace, remove} from "../utils";
+import {RenderPosition, render, replace, remove} from "../utils/render";
+import {UpdateType, UserAction} from "../constants";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -8,13 +9,13 @@ const Mode = {
 };
 
 class PointPresenter {
-  constructor(container, changePoint, changeMode) {
+  constructor(container, changeData, changeMode) {
     this._container = container;
 
     this._pointView = null;
     this._pointEditView = null;
     this._mode = Mode.DEFAULT;
-    this._changePoint = changePoint;
+    this._changeData = changeData;
     this._changeMode = changeMode;
     this._replaceCardToForm = this._replaceCardToForm.bind(this);
     this._replaceFormToCard = this._replaceFormToCard.bind(this);
@@ -79,8 +80,19 @@ class PointPresenter {
     this._mode = Mode.DEFAULT;
   }
 
-  _handleFavoriteClick() {
-    this._changePoint(Object.assign({}, this._point, {isFavorite: !this._point.isFavorite}));
+  _handleFavoriteClick(isFavorite) {
+    this._changeData(
+        UserAction.UPDATE_POINT,
+        UpdateType.PATCH,
+        Object.assign({}, this._point, {isFavorite}));
+  }
+
+  handleFormSubmit(point) {
+    this._changeData(
+        UserAction.ADD_POINT,
+        UpdateType.PATCH,
+        point
+    );
   }
 
   _onEscKeyDown(evt) {

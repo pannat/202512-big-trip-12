@@ -1,4 +1,6 @@
-import {cities, eventTypes, getUpperFirst, calculateGroup, groupToPretext} from "../utils";
+import {getUpperFirst} from "../utils/common";
+import {calculateGroup} from "../utils/point";
+import {cities, eventTypes, groupToPretext} from "../constants";
 import SmartView from "./smart";
 
 import flatpickr from "flatpickr";
@@ -277,7 +279,8 @@ class PointEdit extends SmartView {
 
   _onFavoriteChange(evt) {
     evt.preventDefault();
-    this._callback.favoriteChange();
+    this.updateData({isFavorite: !this._data.isFavorite}, true);
+    this._callback.favoriteChange(this._data.isFavorite);
   }
 
   _onTypeChange(evt) {

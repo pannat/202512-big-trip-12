@@ -1,4 +1,4 @@
-import {getRandomInt} from "../utils";
+import {getRandomInt} from "../utils/common";
 
 const destinations = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
 

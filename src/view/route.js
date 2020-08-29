@@ -1,5 +1,5 @@
 import AbstractView from "./abstract";
-import {getFormattedDate, Format} from "../utils";
+import moment from "moment";
 
 const createRouteTemplate = (title, dates) => `<div class="trip-info__main">
               <h1 class="trip-info__title">${title}</h1>
@@ -14,7 +14,7 @@ class Route extends AbstractView {
   }
 
   _getDates() {
-    return this._dates ? this._dates.map((date) => getFormattedDate(date, Format.DATE_SHORT)).join(`&nbsp;&mdash;&nbsp;`) : ``;
+    return this._dates ? this._dates.map((date) => moment(date).format(`MMM DD`)).join(`&nbsp;&mdash;&nbsp;`) : ``;
   }
   _getTitle() {
     if (this._cities.length) {

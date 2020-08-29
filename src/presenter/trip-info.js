@@ -1,14 +1,14 @@
 import TripInfoView from "../view/trip-info";
-import {render, RenderPosition} from "../utils";
+import {render, RenderPosition} from "../utils/render";
 import Route from "../view/route";
 
 class TripInfo {
-  constructor(container) {
+  constructor(container, pointsModel) {
     this._container = container;
+    this._pointsModel = pointsModel;
   }
 
-  init(points) {
-    this._points = points.slice(0).sort((a, b) => a.dates.startDate - b.dates.startDate);
+  init() {
     this.renderTripInfo();
   }
 
@@ -24,7 +24,7 @@ class TripInfo {
 
   _getUniqueCities() {
     const cities = [];
-    this._points.forEach((point) => {
+    this._getPoints().forEach((point) => {
       if (cities.indexOf(point.destination.name) === -1) {
         cities.push(point.destination.name);
       }
@@ -32,15 +32,19 @@ class TripInfo {
     return cities;
   }
 
+  _getPoints() {
+    return this._pointsModel.getPoints();
+  }
+
   _getTotalPrice() {
-    return this._points.reduce((acc, point) => {
+    return this._getPoints().reduce((acc, point) => {
       return acc + point.price;
     }, 0);
   }
 
   _getRouteDates() {
-    const sortedPointsByEndDate = this._points.slice(0).sort((a, b) => b.dates.endDate - a.dates.endDate);
-    return [this._points[0].dates.startDate, sortedPointsByEndDate[0].dates.endDate];
+    const sortedPointsByEndDate = this._getPoints().slice(0).sort((a, b) => b.dates.endDate - a.dates.endDate);
+    return [this._getPoints()[0].dates.startDate, sortedPointsByEndDate[0].dates.endDate];
   }
 }
 

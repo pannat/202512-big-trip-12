@@ -1,43 +1,66 @@
 import Days from "../view/days";
-import {RenderPosition, SortType, LOCALE, sortTypes, render, remove, updateItem} from "../utils";
+import {RenderPosition, render, remove} from "../utils/render";
+import {filter} from "../utils/filter";
+import {LOCALE, SortType, sortTypes, UserAction, UpdateType, FilterType} from "../constants";
 import NoPoints from "../view/no-points";
 import Sort from "../view/sort";
 import PointPresenter from "./point";
 
 class Trip {
-  constructor(container) {
+  constructor(container, pointsModel, filterModel) {
     this._container = container;
-    this._points = null;
+    this._pointsModel = pointsModel;
+    this._filterModel = filterModel;
     this._currentSortType = SortType.EVENT;
-    this._pointPresenter = new Map();
+    this._daysView = null;
+    this._sortView = null;
+    this._pointPresenter = {};
 
     this._handleSortPoints = this._handleSortPoints.bind(this);
-    this._handlePointChange = this._handlePointChange.bind(this);
+    this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
+
+    this._pointsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
   }
 
-  init(points) {
-    this._points = points.slice(0).sort((a, b) => a.dates.startDate - b.dates.startDate);
-    if (this._points.length) {
+  init() {
+    if (this._getPoints().length) {
       this._renderSort();
-      this._renderTrip();
+      this._renderPointsLists();
     } else {
       this._renderNoPoints();
     }
   }
 
+  _getPoints() {
+    const filterType = this._filterModel.getFilter();
+    const points = this._pointsModel.getPoints();
+    const filteredPoints = filter[filterType](points);
+
+    switch (this._currentSortType) {
+      case SortType.PRICE:
+        return filteredPoints.sort((a, b) => b.price - a.price);
+      case SortType.TIME:
+        // TODO: здесь нужна сортировка по продолжительности
+        return filteredPoints.sort((a, b) => a.dates.endDate - b.dates.endDate);
+    }
+    return filteredPoints.sort((a, b) => a.dates.startDate - b.dates.startDate);
+  }
+
   _getUniqueDays() {
     const uniqueDays = [];
-    this._points.forEach(({dates}) => {
+    this._getPoints().forEach(({dates}) => {
       const startDay = dates.startDate.toLocaleDateString(LOCALE);
       if (uniqueDays.indexOf(startDay) === -1) {
-        uniqueDays.push(new Date(startDay));
+        uniqueDays.push(startDay);
       }
     });
     return uniqueDays;
   }
 
-  _renderTrip() {
+  _renderPointsLists() {
     let uniqueDays = [``];
     if (this._currentSortType === SortType.EVENT) {
       uniqueDays = this._getUniqueDays();
@@ -46,23 +69,24 @@ class Trip {
     this._renderPoints(uniqueDays);
   }
 
-  _renderPoints(days) {
-    this._daysView.getTripPointsLists().forEach((element, i) => {
-      let pointsForDay = this._points.slice(0);
-      if (days.length > 1) {
-        pointsForDay = this._points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === days[i].toLocaleDateString(LOCALE));
-      }
-      pointsForDay.forEach((point) => {
-        const pointPresenter = new PointPresenter(element, this._handlePointChange, this._handleModeChange);
-        pointPresenter.init(point);
-        this._pointPresenter.set(Symbol(point.id), pointPresenter);
-      });
-    });
-  }
-
   _renderDays(days) {
     this._daysView = new Days(days);
     render(this._container, this._daysView, RenderPosition.BEFORE_END);
+  }
+
+  _renderPoints(days) {
+    const points = this._getPoints();
+    this._daysView.getTripPointsLists().forEach((element, i) => {
+      let pointsForDay = points;
+      if (days.length > 1) {
+        pointsForDay = points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === days[i]);
+      }
+      pointsForDay.forEach((point) => {
+        const pointPresenter = new PointPresenter(element, this._handleViewAction, this._handleModeChange);
+        pointPresenter.init(point);
+        this._pointPresenter[point.id] = pointPresenter;
+      });
+    });
   }
 
   _renderNoPoints() {
@@ -71,16 +95,19 @@ class Trip {
   }
 
   _renderSort() {
-    const sort = new Sort(sortTypes);
-    render(this._container, sort, RenderPosition.BEFORE_END);
-    sort.setSortTypeChangeHandler(this._handleSortPoints);
+    this._sortView = new Sort(sortTypes);
+    render(this._container, this._sortView, RenderPosition.AFTER_BEGIN);
+    this._sortView.setSortTypeChangeHandler(this._handleSortPoints);
+    this._sortView.restoreHandlers();
   }
 
-  _clearTrip() {
+  _clearPointsLists() {
     remove(this._daysView);
+    this._daysView = null;
 
-    this._pointPresenter.forEach((presenter) => presenter.destroy());
-    this._pointPresenter.clear();
+    Object.values(this._pointPresenter)
+      .forEach((presenter) => presenter.destroy());
+    this._pointPresenter = {};
   }
 
   _handleSortPoints(sortType) {
@@ -89,31 +116,53 @@ class Trip {
     }
 
     this._currentSortType = sortType;
-    switch (sortType) {
-      case SortType.PRICE:
-        this._points = this._points.slice(0).sort((a, b) => b.price - a.price);
-        break;
-      case SortType.TIME:
-        this._points = this._points.slice(0).sort((a, b) => a.dates.endDate - b.dates.endDate);
-        break;
-      default:
-        this._points = this._points.slice(0).sort((a, b) => a.dates.startDate - b.dates.startDate);
+    this._clearPointsLists();
+    if (this._getPoints().length) {
+      this._renderPointsLists();
     }
-
-    this._clearTrip();
-    if (this._points.length) {
-      this._renderTrip();
-    }
-  }
-
-  _handlePointChange(updatedPoint) {
-    this._points = updateItem(this._points, updatedPoint);
   }
 
   _handleModeChange() {
-    this._pointPresenter.forEach((presenter) => {
+    Object.values(this._pointPresenter).forEach((presenter) => {
       presenter.resetView();
     });
+  }
+
+  _handleViewAction(actionType, updateType, update) {
+    switch (actionType) {
+      case UserAction.ADD_POINT:
+        this._pointsModel.addPoint(updateType, update);
+        break;
+      case UserAction.UPDATE_POINT:
+        this._pointsModel.updatePoint(updateType, update);
+        break;
+      case UserAction.DELETE_POINT:
+        this._pointsModel.deletePoint(updateType, update);
+        break;
+    }
+  }
+
+  _handleModelEvent(updateType, data) {
+    switch (updateType) {
+      case UpdateType.MAJOR:
+        remove(this._sortView);
+        this._sortView = null;
+        this._currentSortType = SortType.EVENT;
+        this._clearPointsLists();
+        this.init();
+        break;
+      case UpdateType.MINOR:
+        this._clearPointsLists();
+        if (this._getPoints().length) {
+          this._renderPointsLists();
+        } else {
+          this._renderNoPoints();
+        }
+        break;
+      case UpdateType.PATCH:
+        this._pointPresenter[data.id].init(data);
+        break;
+    }
   }
 }
 

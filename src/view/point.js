@@ -1,5 +1,7 @@
 import moment from "moment";
-import {getUpperFirst, calculateGroup, groupToPretext} from "../utils";
+import {getUpperFirst} from "../utils/common";
+import {calculateGroup} from "../utils/point";
+import {groupToPretext} from "../constants";
 import AbstractView from "./abstract";
 
 const createPointTemplate = (type, pretext, destination, startDate, endDate, duration, price, offers) => `
@@ -75,14 +77,13 @@ class Point extends AbstractView {
 
     if (days) {
       duration += `${days}D ${hours}H`;
-    } else {
+    } else if (hours) {
       duration += `${hours}H`;
     }
     duration += ` ${minutes}M`;
 
     return duration;
   }
-
 
   _onButtonClick(evt) {
     evt.preventDefault();
