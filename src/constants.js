@@ -54,8 +54,6 @@ const FilterType = {
   PAST: `past`
 };
 
-const filters = Object.values(FilterType);
+const POINT_COUNT = 1;
 
-const POINT_COUNT = 20;
-
-export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, filters, groupToPretext, eventTypes, sortTypes, cities, SortType};
+export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, sortTypes, cities, SortType};

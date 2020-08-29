@@ -1,29 +1,29 @@
 import AbstractView from "./abstract";
-import {getUpperFirst} from "../utils/common";
 
 const createFilterTemplate = (filter, currentFilter) => `
             <div class="trip-filters__filter">
-              <input id="filter-${filter}"
+              <input id="filter-${filter.name}"
                 class="trip-filters__filter-input visually-hidden"
                 type="radio"
                 name="trip-filter"
-                value="${filter}"
-                ${filter === currentFilter ? `checked` : ``}
+                value="${filter.name}"
+                ${filter.name === currentFilter ? `checked` : ``}
+                ${filter.isDisabled ? `disabled` : ``}
               >
-              <label class="trip-filters__filter-label" for="filter-${filter}">${getUpperFirst(filter)}</label>
+              <label class="trip-filters__filter-label" for="filter-${filter.name}">${filter.name}</label>
             </div>`.trim();
 
 
-const createFiltersTemplate = (currentFilter, filterList) =>`
+const createFiltersTemplate = (currentFilter, filters) =>`
               <form class="trip-filters" action="#" method="get">
-                ${filterList.map((filter) => createFilterTemplate(filter, currentFilter)).join(``)}
+                ${filters.map((filter) => createFilterTemplate(filter, currentFilter)).join(``)}
                 <button class="visually-hidden" type="submit">Accept filter</button>
               </form>`.trim();
 
 class Filter extends AbstractView {
-  constructor(filterList, currentFilter) {
+  constructor(filters, currentFilter) {
     super();
-    this._filterList = filterList;
+    this._filters = filters;
     this._currentFilter = currentFilter;
 
     this._onFilterChange = this._onFilterChange.bind(this);
@@ -38,7 +38,7 @@ class Filter extends AbstractView {
   }
 
   _getTemplate() {
-    return createFiltersTemplate(this._currentFilter, this._filterList);
+    return createFiltersTemplate(this._currentFilter, this._filters);
   }
 
   _onFilterChange(evt) {

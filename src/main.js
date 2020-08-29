@@ -1,12 +1,14 @@
 import NavView from "./view/nav";
+
 import TripInfoPresenter from "./presenter/trip-info";
 import TripPresenter from "./presenter/trip";
 import FilterPresenter from "./presenter/filter";
+
 import PointsModel from "./model/points";
+import FilterModel from "./model/filter";
 import {POINT_COUNT} from "./constants";
 import {render, RenderPosition} from "./utils/render";
 import {generatePoint} from "./mock";
-import FilterModel from "./model/filter";
 
 const tripMainElement = document.querySelector(`.trip-main`);
 const controlsElement = document.querySelector(`.trip-controls`);
@@ -26,6 +28,6 @@ tripPresenter.init();
 const nav = new NavView();
 render(controlsElement, nav.getElement(), RenderPosition.BEFORE_END);
 
-const filterPresenter = new FilterPresenter(controlsElement, filterModel);
+const filterPresenter = new FilterPresenter(controlsElement, pointsModel, filterModel);
 filterPresenter.init();
 
