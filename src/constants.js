@@ -54,6 +54,6 @@ const FilterType = {
   PAST: `past`
 };
 
-const POINT_COUNT = 20;
+const POINT_COUNT = 1;
 
 export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, sortTypes, cities, SortType};

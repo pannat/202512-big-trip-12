@@ -1,10 +1,11 @@
 import Days from "../view/days";
-import {RenderPosition, render, remove} from "../utils/render";
+import {RenderPosition, render, remove, generateId} from "../utils/render";
 import {filter} from "../utils/filter";
 import {LOCALE, SortType, sortTypes, UserAction, UpdateType, FilterType} from "../constants";
 import NoPoints from "../view/no-points";
 import Sort from "../view/sort";
 import PointPresenter from "./point";
+import PointNew from "./point-new";
 
 class Trip {
   constructor(container, pointsModel, filterModel) {
@@ -23,6 +24,8 @@ class Trip {
 
     this._pointsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
+
+    this._pointNewPresenter = new PointNew(this._container, this._handleViewAction);
   }
 
   init() {
@@ -34,11 +37,16 @@ class Trip {
     }
   }
 
+  createPoint(callback) {
+    this._pointNewPresenter.init(callback);
+
+    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+  }
+
   _getPoints() {
     const filterType = this._filterModel.getFilter();
     const points = this._pointsModel.getPoints();
     const filteredPoints = filter[filterType](points);
-
     switch (this._currentSortType) {
       case SortType.PRICE:
         return filteredPoints.sort((a, b) => b.price - a.price);
@@ -110,6 +118,15 @@ class Trip {
     this._pointPresenter = {};
   }
 
+  _renderTrip() {
+    remove(this._sortView);
+    this._sortView = null;
+
+    this._currentSortType = SortType.EVENT;
+    this._clearPointsLists();
+    this.init();
+  }
+
   _handleSortPoints(sortType) {
     if (this._currentSortType === sortType) {
       return;
@@ -126,6 +143,8 @@ class Trip {
     Object.values(this._pointPresenter).forEach((presenter) => {
       presenter.resetView();
     });
+
+    this._pointNewPresenter.destroy();
   }
 
   _handleViewAction(actionType, updateType, update) {
@@ -145,11 +164,7 @@ class Trip {
   _handleModelEvent(updateType, data) {
     switch (updateType) {
       case UpdateType.MAJOR:
-        remove(this._sortView);
-        this._sortView = null;
-        this._currentSortType = SortType.EVENT;
-        this._clearPointsLists();
-        this.init();
+        this._renderTrip();
         break;
       case UpdateType.MINOR:
         this._clearPointsLists();

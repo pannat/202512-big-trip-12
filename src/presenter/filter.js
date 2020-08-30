@@ -14,6 +14,7 @@ class Filter {
     this._filterChangeHandler = this._filterChangeHandler.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._pointsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
   }
 
   init() {
@@ -22,6 +23,11 @@ class Filter {
     this._filterView.setOnFilterChange(this._filterChangeHandler);
     this._filterView.restoreHandlers();
     render(this._container, this._filterView, RenderPosition.BEFORE_END);
+  }
+
+  destroy() {
+    remove(this._filterView);
+    this._filterView = null;
   }
 
   _filterChangeHandler(currentFilter) {
@@ -52,7 +58,7 @@ class Filter {
 
   _handleModelEvent(updateType) {
     if (updateType === UpdateType.MAJOR) {
-      remove(this._filterView);
+      this.destroy();
       this.init();
     }
   }

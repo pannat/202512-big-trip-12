@@ -33,10 +33,10 @@ class PointPresenter {
 
     this._pointView = new Point(this._point);
     this._pointEditView = new PointEdit(this._point);
-    this._pointEditView.setOnFormSubmit(this._replaceFormToCard);
+    this._pointEditView.setOnFormSubmit(this._handleFormSubmit);
     this._pointEditView.setOnButtonCloseClick(this._replaceFormToCard);
     this._pointEditView.setOnFavoriteChange(this._handleFavoriteClick);
-    this._pointEditView.setOnButtonDeleteClick(this._handleButtonDeleteClick);
+    this._pointEditView.setOnButtonResetClick(this._handleButtonDeleteClick);
     this._pointView.setOnButtonClick(this._replaceCardToForm);
 
     if (!prevPointView || !prevPointEditView) {
@@ -59,6 +59,9 @@ class PointPresenter {
   destroy() {
     remove(this._pointView);
     remove(this._pointEditView);
+
+    this._pointView = null;
+    this._pointEditView = null;
   }
 
   resetView() {
@@ -92,10 +95,11 @@ class PointPresenter {
 
   _handleFormSubmit(point) {
     this._changeData(
-        UserAction.ADD_POINT,
+        UserAction.UPDATE_POINT,
         UpdateType.PATCH,
         point
     );
+    this._replaceFormToCard();
   }
 
   _handleButtonDeleteClick(point) {

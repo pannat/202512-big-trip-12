@@ -123,5 +123,5 @@ const generatePoint = () => {
   return point;
 };
 
-export {generatePoint, additionalOptions};
+export {generatePoint, additionalOptions, generateId};
 

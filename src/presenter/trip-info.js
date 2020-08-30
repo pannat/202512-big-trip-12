@@ -40,7 +40,7 @@ class TripInfo {
 
   _getTotalPrice() {
     return this._getPoints().reduce((acc, point) => {
-      return acc + point.price;
+      return acc + parseInt(point.price, 10);
     }, 0);
   }
 
@@ -52,6 +52,8 @@ class TripInfo {
   _handleModelEvent() {
     remove(this._tripInfoView);
     remove(this._routeView);
+    this._tripInfoView = null;
+    this._routeView = null;
 
     this.init();
   }
