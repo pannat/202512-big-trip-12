@@ -20,6 +20,8 @@ class PointPresenter {
     this._replaceCardToForm = this._replaceCardToForm.bind(this);
     this._replaceFormToCard = this._replaceFormToCard.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._handleButtonDeleteClick = this._handleButtonDeleteClick.bind(this);
+    this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
   }
 
@@ -34,6 +36,7 @@ class PointPresenter {
     this._pointEditView.setOnFormSubmit(this._replaceFormToCard);
     this._pointEditView.setOnButtonCloseClick(this._replaceFormToCard);
     this._pointEditView.setOnFavoriteChange(this._handleFavoriteClick);
+    this._pointEditView.setOnButtonDeleteClick(this._handleButtonDeleteClick);
     this._pointView.setOnButtonClick(this._replaceCardToForm);
 
     if (!prevPointView || !prevPointEditView) {
@@ -87,10 +90,18 @@ class PointPresenter {
         Object.assign({}, this._point, {isFavorite}));
   }
 
-  handleFormSubmit(point) {
+  _handleFormSubmit(point) {
     this._changeData(
         UserAction.ADD_POINT,
         UpdateType.PATCH,
+        point
+    );
+  }
+
+  _handleButtonDeleteClick(point) {
+    this._changeData(
+        UserAction.DELETE_POINT,
+        UpdateType.MAJOR,
         point
     );
   }

@@ -196,6 +196,7 @@ class PointEdit extends SmartView {
     this._onDestinationChange = this._onDestinationChange.bind(this);
     this._onStartDatePickerChange = this._onStartDatePickerChange.bind(this);
     this._onEndDatePickerChange = this._onEndDatePickerChange.bind(this);
+    this._onButtonDeleteClick = this._onButtonDeleteClick.bind(this);
 
     this._setInnerHandlers();
   }
@@ -205,11 +206,15 @@ class PointEdit extends SmartView {
   }
 
   setOnButtonCloseClick(callback) {
-    this._callback.closeButtonClick = callback;
+    this._callback.buttonCloseClick = callback;
   }
 
   setOnFavoriteChange(callback) {
     this._callback.favoriteChange = callback;
+  }
+
+  setOnButtonDeleteClick(callback) {
+    this._callback.buttonDeleteClick = callback;
   }
 
   restoreHandlers() {
@@ -218,6 +223,7 @@ class PointEdit extends SmartView {
     this.getElement().addEventListener(`submit`, this._onFormSubmit);
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._onButtonCloseClick);
     this.getElement().querySelector(`.event__favorite-checkbox`).addEventListener(`change`, this._onFavoriteChange);
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._onButtonDeleteClick);
   }
 
   reset(point) {
@@ -270,7 +276,7 @@ class PointEdit extends SmartView {
 
   _onButtonCloseClick(evt) {
     evt.preventDefault();
-    this._callback.closeButtonClick();
+    this._callback.buttonCloseClick();
     Object.values(this._datepicker).forEach((datepicker) => {
       datepicker.destroy();
       datepicker = null;
@@ -321,6 +327,10 @@ class PointEdit extends SmartView {
         endDate: value
       },
     }, true);
+  }
+
+  _onButtonDeleteClick() {
+    this._callback.buttonDeleteClick(PointEdit.parseDataToPoint(this._data));
   }
 
   static parsePointToData(point) {
