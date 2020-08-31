@@ -2,6 +2,7 @@ import {getUpperFirst} from "../utils/common";
 import {calculateGroup} from "../utils/point";
 import {cities, eventTypes, groupToPretext} from "../constants";
 import SmartView from "./smart";
+import moment from "moment";
 
 import flatpickr from "flatpickr";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
@@ -256,7 +257,7 @@ class PointEdit extends SmartView {
           enableTime: true,
           defaultDate: this._data.dates.startDate,
           [`time_24hr`]: true,
-          onChange: this._onStartDatePickerChange
+          onChange: this._onStartDatePickerChange,
         }
     );
 
@@ -267,6 +268,7 @@ class PointEdit extends SmartView {
           enableTime: true,
           [`time_24hr`]: true,
           defaultDate: this._data.dates.endDate,
+          minDate: this._data.dates.startDate,
           onChange: this._onEndDatePickerChange
         }
     );
@@ -316,9 +318,11 @@ class PointEdit extends SmartView {
   }
 
   _onDestinationChange(evt) {
+    const index = cities.indexOf(evt.target.value);
+    const city = index > -1 ? evt.target.value : ``;
     this.updateData({
       destination: {
-        name: evt.target.value,
+        name: city,
         description: `New new new`,
         photos: []
       }
@@ -344,8 +348,10 @@ class PointEdit extends SmartView {
   }
 
   _onPriceChange(evt) {
+    const price = evt.target.value.replace(/\D/g, ``);
+    evt.target.value = price;
     this.updateData({
-      price: evt.target.value
+      price
     },
     true);
   }
