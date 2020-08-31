@@ -2,7 +2,6 @@ import {getUpperFirst} from "../utils/common";
 import {calculateGroup} from "../utils/point";
 import {cities, eventTypes, groupToPretext} from "../constants";
 import SmartView from "./smart";
-import moment from "moment";
 
 import flatpickr from "flatpickr";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";

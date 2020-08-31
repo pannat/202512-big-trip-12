@@ -1,5 +1,5 @@
 import Days from "../view/days";
-import {RenderPosition, render, remove, generateId} from "../utils/render";
+import {RenderPosition, render, remove} from "../utils/render";
 import {filter} from "../utils/filter";
 import {LOCALE, SortType, sortTypes, UserAction, UpdateType, FilterType} from "../constants";
 import NoPoints from "../view/no-points";
@@ -134,9 +134,7 @@ class Trip {
 
     this._currentSortType = sortType;
     this._clearPointsLists();
-    if (this._getPoints().length) {
-      this._renderPointsLists();
-    }
+    this._renderPointsLists();
   }
 
   _handleModeChange() {
@@ -168,11 +166,7 @@ class Trip {
         break;
       case UpdateType.MINOR:
         this._clearPointsLists();
-        if (this._getPoints().length) {
-          this._renderPointsLists();
-        } else {
-          this._renderNoPoints();
-        }
+        this._renderPointsLists();
         break;
       case UpdateType.PATCH:
         this._pointPresenter[data.id].init(data);
