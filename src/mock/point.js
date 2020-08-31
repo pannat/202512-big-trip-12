@@ -1,4 +1,4 @@
-import {getRandomInt} from "../utils";
+import {getRandomInt} from "../utils/common";
 
 const destinations = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
 
@@ -123,5 +123,5 @@ const generatePoint = () => {
   return point;
 };
 
-export {generatePoint, additionalOptions};
+export {generatePoint, additionalOptions, generateId};
 

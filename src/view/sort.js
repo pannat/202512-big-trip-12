@@ -1,5 +1,5 @@
 import AbstractView from "./abstract";
-import {getUpperFirst} from "../utils";
+import {getUpperFirst} from "../utils/common";
 
 const createSortTemplate = (sortingTypes) => `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
               <span class="trip-sort__item  trip-sort__item--day">Day</span>
@@ -30,9 +30,12 @@ class Sort extends AbstractView {
     this._onSortChange = this._sortTypeChangeHandler.bind(this);
   }
 
+  restoreHandlers() {
+    this.getElement().addEventListener(`change`, this._onSortChange);
+  }
+
   setSortTypeChangeHandler(callback) {
     this._callback.sortChange = callback;
-    this.getElement().addEventListener(`change`, this._onSortChange);
   }
 
   _sortTypeChangeHandler(evt) {

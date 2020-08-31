@@ -1,14 +1,4 @@
-const eventTypes = {
-  transfer: [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`],
-  activity: [`check-in`, `sightseeing`, `restaurant`]
-};
-
-const cities = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
-
-const groupToPretext = {
-  transfer: `to`,
-  activity: `in`
-};
+import {eventTypes} from "../constants";
 
 const calculateGroup = (type) => {
   let group = ``;
@@ -20,4 +10,4 @@ const calculateGroup = (type) => {
   return group;
 };
 
-export {eventTypes, cities, groupToPretext, calculateGroup};
+export {calculateGroup};

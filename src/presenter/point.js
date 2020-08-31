@@ -1,6 +1,7 @@
 import Point from "../view/point";
 import PointEdit from "../view/point-edit";
-import {render, RenderPosition, replace, remove} from "../utils";
+import {RenderPosition, render, replace, remove} from "../utils/render";
+import {UpdateType, UserAction} from "../constants";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -8,17 +9,19 @@ const Mode = {
 };
 
 class PointPresenter {
-  constructor(container, changePoint, changeMode) {
+  constructor(container, changeData, changeMode) {
     this._container = container;
 
     this._pointView = null;
     this._pointEditView = null;
     this._mode = Mode.DEFAULT;
-    this._changePoint = changePoint;
+    this._changeData = changeData;
     this._changeMode = changeMode;
     this._replaceCardToForm = this._replaceCardToForm.bind(this);
     this._replaceFormToCard = this._replaceFormToCard.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._handleButtonDeleteClick = this._handleButtonDeleteClick.bind(this);
+    this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
   }
 
@@ -30,9 +33,10 @@ class PointPresenter {
 
     this._pointView = new Point(this._point);
     this._pointEditView = new PointEdit(this._point);
-    this._pointEditView.setOnFormSubmit(this._replaceFormToCard);
+    this._pointEditView.setOnFormSubmit(this._handleFormSubmit);
     this._pointEditView.setOnButtonCloseClick(this._replaceFormToCard);
     this._pointEditView.setOnFavoriteChange(this._handleFavoriteClick);
+    this._pointEditView.setOnButtonResetClick(this._handleButtonDeleteClick);
     this._pointView.setOnButtonClick(this._replaceCardToForm);
 
     if (!prevPointView || !prevPointEditView) {
@@ -55,6 +59,9 @@ class PointPresenter {
   destroy() {
     remove(this._pointView);
     remove(this._pointEditView);
+
+    this._pointView = null;
+    this._pointEditView = null;
   }
 
   resetView() {
@@ -79,8 +86,28 @@ class PointPresenter {
     this._mode = Mode.DEFAULT;
   }
 
-  _handleFavoriteClick() {
-    this._changePoint(Object.assign({}, this._point, {isFavorite: !this._point.isFavorite}));
+  _handleFavoriteClick(isFavorite) {
+    this._changeData(
+        UserAction.UPDATE_POINT,
+        UpdateType.PATCH,
+        Object.assign({}, this._point, {isFavorite}));
+  }
+
+  _handleFormSubmit(point) {
+    this._changeData(
+        UserAction.UPDATE_POINT,
+        UpdateType.PATCH,
+        point
+    );
+    this._replaceFormToCard();
+  }
+
+  _handleButtonDeleteClick(point) {
+    this._changeData(
+        UserAction.DELETE_POINT,
+        UpdateType.MAJOR,
+        point
+    );
   }
 
   _onEscKeyDown(evt) {
