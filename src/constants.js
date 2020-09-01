@@ -54,6 +54,11 @@ const FilterType = {
   PAST: `past`
 };
 
+const MenuItem = {
+  TABLE: `table`,
+  STATS: `stats`
+};
+
 const POINT_COUNT = 1;
 
-export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, sortTypes, cities, SortType};
+export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, sortTypes, cities, SortType, MenuItem};

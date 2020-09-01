@@ -15,15 +15,13 @@ class Trip {
     this._currentSortType = SortType.EVENT;
     this._daysView = null;
     this._sortView = null;
+    this._noPointsView = null;
     this._pointPresenter = {};
 
     this._handleSortPoints = this._handleSortPoints.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
-
-    this._pointsModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
 
     this._pointNewPresenter = new PointNew(this._container, this._handleViewAction);
   }
@@ -32,15 +30,34 @@ class Trip {
     if (this._getPoints().length) {
       this._renderSort();
       this._renderPointsLists();
+      this._pointsModel.addObserver(this._handleModelEvent);
+      this._filterModel.addObserver(this._handleModelEvent);
     } else {
       this._renderNoPoints();
     }
   }
 
+  destroy() {
+    if (this._getPoints().length) {
+      remove(this._sortView);
+      this._sortView = null;
+      this._clearPointsLists();
+      this._pointsModel.removeObserver(this._handleModelEvent);
+      this._filterModel.removeObserver(this._handleModelEvent);
+    } else {
+      remove(this._noPointsView);
+      this._noPointsView = null;
+    }
+  }
+
   createPoint(callback) {
     this._pointNewPresenter.init(callback);
-
-    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    if (this._getPoints().length) {
+      this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    } else {
+      remove(this._noPointsView);
+      this._noPointsView = null;
+    }
   }
 
   _getPoints() {
@@ -54,6 +71,7 @@ class Trip {
         // TODO: здесь нужна сортировка по продолжительности
         return filteredPoints.sort((a, b) => a.dates.endDate - b.dates.endDate);
     }
+
     return filteredPoints.sort((a, b) => a.dates.startDate - b.dates.startDate);
   }
 
@@ -98,8 +116,8 @@ class Trip {
   }
 
   _renderNoPoints() {
-    const noPointsView = new NoPoints();
-    render(this._container, noPointsView, RenderPosition.BEFORE_END);
+    this._noPointsView = new NoPoints();
+    render(this._container, this._noPointsView, RenderPosition.AFTER_BEGIN);
   }
 
   _renderSort() {
@@ -110,8 +128,10 @@ class Trip {
   }
 
   _clearPointsLists() {
-    remove(this._daysView);
-    this._daysView = null;
+    if (this._daysView) {
+      remove(this._daysView);
+      this._daysView = null;
+    }
 
     Object.values(this._pointPresenter)
       .forEach((presenter) => presenter.destroy());
@@ -119,10 +139,18 @@ class Trip {
   }
 
   _renderTrip() {
-    remove(this._sortView);
-    this._sortView = null;
+    if (this._sortView) {
+      remove(this._sortView);
+      this._sortView = null;
+    }
+
+    if (this._noPointsView) {
+      remove(this._noPointsView);
+      this._noPointsView = null;
+    }
 
     this._currentSortType = SortType.EVENT;
+
     this._clearPointsLists();
     this.init();
   }
@@ -164,10 +192,10 @@ class Trip {
       case UpdateType.MAJOR:
         this._renderTrip();
         break;
-      case UpdateType.MINOR:
-        this._clearPointsLists();
-        this._renderPointsLists();
-        break;
+      // case UpdateType.MINOR:
+      //   this._clearPointsLists();
+      //   this._renderPointsLists();
+      //   break;
       case UpdateType.PATCH:
         this._pointPresenter[data.id].init(data);
         break;
