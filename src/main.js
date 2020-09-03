@@ -26,8 +26,8 @@ const pointsModel = new PointsModel(points);
 pointsModel.setPoints(points);
 const filterModel = new FilterModel();
 
+let statsView = null;
 const navView = new NavView();
-const statsView = new StatsView();
 const tripPresenter = new TripPresenter(tripContainerElement, pointsModel, filterModel, buttonNewPointElement);
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, pointsModel);
 const filterPresenter = new FilterPresenter(controlsElement, pointsModel, filterModel);
@@ -36,14 +36,15 @@ const handleMenuItemClick = (menuItem) => {
   switch (menuItem) {
     case MenuItem.STATS:
       navView.setMenuItem(MenuItem.STATS);
+      statsView = new StatsView(pointsModel.getPoints());
       render(mainBodyElement, statsView, RenderPosition.BEFORE_END);
-      statsView.getElement().classList.remove(`visually-hidden`);
       tripPresenter.destroy();
       break;
     case MenuItem.TABLE:
       navView.setMenuItem(MenuItem.TABLE);
       tripPresenter.init();
       remove(statsView);
+      statsView = null;
       break;
   }
 };

@@ -1,7 +1,7 @@
 import Days from "../view/days";
 import {RenderPosition, render, remove} from "../utils/render";
 import {filter} from "../utils/filter";
-import {LOCALE, SortType, sortTypes, UserAction, UpdateType, FilterType} from "../constants";
+import {LOCALE, SortType, UserAction, UpdateType, FilterType} from "../constants";
 import NoPoints from "../view/no-points";
 import Sort from "../view/sort";
 import PointPresenter from "./point";
@@ -41,6 +41,7 @@ class Trip {
     if (this._getPoints().length) {
       remove(this._sortView);
       this._sortView = null;
+      this._currentSortType = SortType.EVENT;
       this._clearPointsLists();
       this._pointsModel.removeObserver(this._handleModelEvent);
       this._filterModel.removeObserver(this._handleModelEvent);
@@ -121,7 +122,7 @@ class Trip {
   }
 
   _renderSort() {
-    this._sortView = new Sort(sortTypes);
+    this._sortView = new Sort(this._currentSortType);
     render(this._container, this._sortView, RenderPosition.AFTER_BEGIN);
     this._sortView.setSortTypeChangeHandler(this._handleSortPoints);
     this._sortView.restoreHandlers();
