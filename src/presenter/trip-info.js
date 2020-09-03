@@ -39,8 +39,13 @@ class TripInfo {
   }
 
   _getTotalPrice() {
-    return this._getPoints().reduce((acc, point) => {
-      return acc + parseInt(point.price, 10);
+    const points = this._getPoints();
+    return points.reduce((acc, point) => {
+      let price = parseInt(point.price, 10);
+      point.offers.forEach((offer) => {
+        price += offer.isApply ? parseInt(offer.price, 10) : 0;
+      });
+      return acc + price;
     }, 0);
   }
 

@@ -200,6 +200,7 @@ class PointEdit extends SmartView {
     this._onButtonResetClick = this._onButtonResetClick.bind(this);
     this._onFormSubmit = this._onFormSubmit.bind(this);
     this._onPriceChange = this._onPriceChange.bind(this);
+    this._onApplyOffersChange = this._onApplyOffersChange.bind(this);
 
     this._setInnerHandlers();
   }
@@ -275,16 +276,13 @@ class PointEdit extends SmartView {
 
   _setInnerHandlers() {
     this.getElement().addEventListener(`change`, this._onTypeChange);
+    this.getElement().addEventListener(`change`, this._onApplyOffersChange);
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._onDestinationChange);
     this.getElement().querySelector(`.event__input--price`).addEventListener(`change`, this._onPriceChange);
   }
 
   _onFormSubmit(evt) {
     evt.preventDefault();
-    const formData = new FormData(this.getElement());
-    this._data.offers.forEach((offer) => {
-      offer.isApply = !!formData.get(`event-offer-${offer.name}`);
-    });
 
     this._callback.formSubmit(PointEdit.parsePointToData(this._data));
   }
@@ -335,6 +333,7 @@ class PointEdit extends SmartView {
         endDate: this._data.dates.endDate
       },
     }, true);
+    this._datepicker.endDate.config.minDate = value[0];
   }
 
   _onEndDatePickerChange(value) {
@@ -353,6 +352,23 @@ class PointEdit extends SmartView {
       price
     },
     true);
+  }
+
+  _onApplyOffersChange(evt) {
+    if (!evt.target.classList.contains(`event__offer-checkbox`)) {
+      return;
+    }
+    const offers = this._data.offers.map((offer) => {
+      const additionalSource = {};
+      if (offer.name === evt.target.dataset.offerName) {
+        additionalSource.isApply = evt.target.checked;
+      }
+      return Object.assign({}, offer, additionalSource);
+    });
+
+    this.updateData({
+      offers
+    });
   }
 
   _onButtonResetClick() {

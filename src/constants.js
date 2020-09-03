@@ -11,24 +11,6 @@ const SortType = {
   PRICE: `price`
 };
 
-const sortTypes = [
-  {
-    name: SortType.EVENT,
-    direction: false,
-    isApply: true
-  },
-  {
-    name: SortType.TIME,
-    direction: `descend`,
-    isApply: false
-  },
-  {
-    name: SortType.PRICE,
-    direction: `descend`,
-    isApply: false
-  }
-];
-
 const groupToPretext = {
   transfer: `to`,
   activity: `in`
@@ -54,6 +36,11 @@ const FilterType = {
   PAST: `past`
 };
 
-const POINT_COUNT = 1;
+const MenuItem = {
+  TABLE: `table`,
+  STATS: `stats`
+};
 
-export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, sortTypes, cities, SortType};
+const POINT_COUNT = 2;
+
+export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, cities, SortType, MenuItem};

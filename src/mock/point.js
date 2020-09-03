@@ -124,4 +124,3 @@ const generatePoint = () => {
 };
 
 export {generatePoint, additionalOptions, generateId};
-
