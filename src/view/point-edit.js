@@ -84,7 +84,7 @@ const createDestinationTemplate = (destination) => {
             <p class="event__destination-description">${destination.description}</p>
             <div class="event__photos-container">
               <div class="event__photos-tape">
-                ${destination.photos.map((photo) => `<img class="event__photo" src="${photo}" alt="Event photo">`).join(``)}
+                ${destination.pictures.map((photo) => `<img class="event__photo" src="${photo}" alt="Event photo">`).join(``)}
               </div>
             </div>
           </section>`;
@@ -321,7 +321,7 @@ class PointEdit extends SmartView {
       destination: {
         name: city,
         description: `New new new`,
-        photos: []
+        pictures: []
       }
     });
   }

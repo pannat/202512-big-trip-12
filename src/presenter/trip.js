@@ -8,10 +8,12 @@ import PointPresenter from "./point";
 import PointNew from "./point-new";
 
 class Trip {
-  constructor(container, pointsModel, filterModel) {
+  constructor(container, pointsModel, filterModel, dictionariesModel) {
     this._container = container;
     this._pointsModel = pointsModel;
     this._filterModel = filterModel;
+    this._dictionariesModel = dictionariesModel;
+
     this._currentSortType = SortType.EVENT;
     this._daysView = null;
     this._sortView = null;
@@ -69,8 +71,7 @@ class Trip {
       case SortType.PRICE:
         return filteredPoints.sort((a, b) => b.price - a.price);
       case SortType.TIME:
-        // TODO: здесь нужна сортировка по продолжительности
-        return filteredPoints.sort((a, b) => a.dates.endDate - b.dates.endDate);
+        return filteredPoints.sort((a, b) => b.duration - a.duration);
     }
 
     return filteredPoints.sort((a, b) => a.dates.startDate - b.dates.startDate);
@@ -79,7 +80,7 @@ class Trip {
   _getUniqueDays() {
     const uniqueDays = [];
     this._getPoints().forEach(({dates}) => {
-      const startDay = dates.startDate.toLocaleDateString(LOCALE);
+      const startDay = dates.startDate.format(`ll`);
       if (uniqueDays.indexOf(startDay) === -1) {
         uniqueDays.push(startDay);
       }
@@ -106,10 +107,10 @@ class Trip {
     this._daysView.getTripPointsLists().forEach((element, i) => {
       let pointsForDay = points;
       if (days.length > 1) {
-        pointsForDay = points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === days[i]);
+        pointsForDay = points.filter(({dates}) => dates.startDate.format(`ll`) === days[i]);
       }
       pointsForDay.forEach((point) => {
-        const pointPresenter = new PointPresenter(element, this._handleViewAction, this._handleModeChange);
+        const pointPresenter = new PointPresenter(element, this._handleViewAction, this._handleModeChange, this._dictionariesModel);
         pointPresenter.init(point);
         this._pointPresenter[point.id] = pointPresenter;
       });

@@ -1,4 +1,5 @@
 import Observer from "../utils/observer";
+import moment from "moment";
 
 class Points extends Observer {
   constructor() {
@@ -49,6 +50,28 @@ class Points extends Observer {
     ];
 
     this._notify(updateType);
+  }
+
+  static adaptToClient(point) {
+    const adaptedPoint = Object.assign(
+        {},
+        point,
+        {
+          dates: {
+            startDate: moment(point[`date_from`]),
+            endDate: moment(point[`date_to`]),
+          },
+          isFavorite: point[`is_favorite`],
+          price: point[`base_price`]
+        }
+    );
+    adaptedPoint.duration = adaptedPoint.dates.endDate.diff(adaptedPoint.dates.startDate);
+    delete adaptedPoint[`date_from`];
+    delete adaptedPoint[`date_to`];
+    delete adaptedPoint[`is_favorite`];
+    delete adaptedPoint[`base_price`];
+
+    return adaptedPoint;
   }
 }
 

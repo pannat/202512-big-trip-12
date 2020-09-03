@@ -28,7 +28,7 @@ const createPointTemplate = (type, pretext, destination, startDate, endDate, dur
                     <h4 class="visually-hidden">Offers:</h4>
                     <ul class="event__selected-offers">
                       ${offers.map((offer) => `<li class="event__offer">
-                        <span class="event__offer-title">${offer.displayName}</span>
+                        <span class="event__offer-title">${offer.title}</span>
                         &plus;
                         &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
                        </li>`).join(``)}
@@ -50,7 +50,7 @@ class Point extends AbstractView {
     this._endDate = moment(dates.endDate);
     this._duration = this._calculateDuration();
     this._price = price;
-    this._offers = offers;
+    this._offers = offers.slice(0, 3);
     this._onButtonClick = this._onButtonClick.bind(this);
   }
   setOnButtonClick(callback) {
@@ -75,9 +75,9 @@ class Point extends AbstractView {
 
     let duration = ``;
 
-    if (days) {
+    if (parseInt(days, 10)) {
       duration += `${days}D ${hours}H`;
-    } else if (hours) {
+    } else if (parseInt(hours, 10)) {
       duration += `${hours}H`;
     }
     duration += ` ${minutes}M`;

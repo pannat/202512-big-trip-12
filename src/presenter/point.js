@@ -9,8 +9,9 @@ const Mode = {
 };
 
 class PointPresenter {
-  constructor(container, changeData, changeMode) {
+  constructor(container, changeData, changeMode, dictionariesModel) {
     this._container = container;
+    this._dictionariesModel = dictionariesModel;
 
     this._pointView = null;
     this._pointEditView = null;
