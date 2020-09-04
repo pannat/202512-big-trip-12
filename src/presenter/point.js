@@ -33,7 +33,7 @@ class PointPresenter {
     const prevPointEditView = this._pointEditView;
 
     this._pointView = new Point(this._point);
-    this._pointEditView = new PointEdit(this._point);
+    this._pointEditView = new PointEdit(this._point, this._dictionariesModel.getDestinations(), this._dictionariesModel.getOffersLists());
     this._pointEditView.setOnFormSubmit(this._handleFormSubmit);
     this._pointEditView.setOnButtonCloseClick(this._replaceFormToCard);
     this._pointEditView.setOnFavoriteChange(this._handleFavoriteClick);

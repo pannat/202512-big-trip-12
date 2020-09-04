@@ -41,14 +41,14 @@ const createPointTemplate = (type, pretext, destination, startDate, endDate, dur
                 </li>`.trim();
 
 class Point extends AbstractView {
-  constructor({type, destination, dates, price, offers}) {
+  constructor({type, destination, dates, price, offers, duration}) {
     super();
     this._type = type;
     this._pretext = groupToPretext[calculateGroup(type)];
     this._destination = destination;
     this._startDate = moment(dates.startDate);
     this._endDate = moment(dates.endDate);
-    this._duration = this._calculateDuration();
+    this._duration = this._humanizeDuration(duration);
     this._price = price;
     this._offers = offers.slice(0, 3);
     this._onButtonClick = this._onButtonClick.bind(this);
@@ -65,9 +65,8 @@ class Point extends AbstractView {
     return createPointTemplate(this._type, this._pretext, this._destination, this._startDate, this._endDate, this._duration, this._price, this._offers);
   }
 
-  _calculateDuration() {
+  _humanizeDuration(diff) {
     const setFormatUnitTime = (unit) => unit > 9 ? unit : `0${unit}`;
-    const diff = this._endDate.diff(this._startDate);
 
     const days = setFormatUnitTime(moment.duration(diff).days());
     const hours = setFormatUnitTime(moment.duration(diff).hours());

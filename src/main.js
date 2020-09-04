@@ -68,9 +68,9 @@ Promise.all([
   api.getDestinations(),
   api.getOffers()
 ])
-  .then(([points, destination, offers]) => {
+  .then(([points, destination, offersLists]) => {
     dictionariesModel.setDestination(destination);
-    dictionariesModel.setOffers(offers);
+    dictionariesModel.setOffersLists(offersLists);
     pointsModel.setPoints(points);
 
     tripPresenter = new TripPresenter(tripContainerElement, pointsModel, filterModel, dictionariesModel);

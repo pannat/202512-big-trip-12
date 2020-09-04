@@ -1,23 +1,23 @@
 class Dictionaries {
   constructor() {
     this._destination = null;
-    this._offers = null;
+    this._offersList = null;
   }
 
   setDestination(destination) {
     this._destination = destination.slice(0);
   }
 
-  setOffers(offers) {
-    this._offers = offers.slice(0);
+  setOffersLists(offersLists) {
+    this._offersLists = offersLists.slice(0);
   }
 
-  getDestination() {
+  getDestinations() {
     return this._destination;
   }
 
-  getOffers() {
-    return this._offers;
+  getOffersLists() {
+    return this._offersLists;
   }
 }
 
