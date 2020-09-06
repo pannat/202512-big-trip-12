@@ -1,21 +1,33 @@
 import Days from "../view/days";
+import LoadingView from "../view/loading";
 import {RenderPosition, render, remove} from "../utils/render";
 import {filter} from "../utils/filter";
-import {LOCALE, SortType, UserAction, UpdateType, FilterType} from "../constants";
+import {SortType, UserAction, UpdateType, FilterType} from "../constants";
 import NoPoints from "../view/no-points";
 import Sort from "../view/sort";
 import PointPresenter from "./point";
 import PointNew from "./point-new";
 
+import PointsModel from "../model/points";
+
 class Trip {
-  constructor(container, pointsModel, filterModel) {
+  constructor(container, pointsModel, filterModel, dictionariesModel, api) {
     this._container = container;
     this._pointsModel = pointsModel;
     this._filterModel = filterModel;
+    this._dictionariesModel = dictionariesModel;
+
+    this._api = api;
+
+    this._isLoading = true;
+
     this._currentSortType = SortType.EVENT;
+
     this._daysView = null;
     this._sortView = null;
     this._noPointsView = null;
+    this._loadingView = new LoadingView();
+
     this._pointPresenter = {};
 
     this._handleSortPoints = this._handleSortPoints.bind(this);
@@ -23,15 +35,28 @@ class Trip {
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
-    this._pointNewPresenter = new PointNew(this._container, this._handleViewAction);
+    this._pointNewPresenter = new PointNew(
+        this._container,
+        this._handleViewAction,
+        this._dictionariesModel
+    );
   }
 
   init() {
+    this._pointsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
+    this._renderTrip();
+  }
+
+  _renderTrip() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
     if (this._getPoints().length) {
       this._renderSort();
       this._renderPointsLists();
-      this._pointsModel.addObserver(this._handleModelEvent);
-      this._filterModel.addObserver(this._handleModelEvent);
     } else {
       this._renderNoPoints();
     }
@@ -54,11 +79,20 @@ class Trip {
   createPoint(callback) {
     this._pointNewPresenter.init(callback);
     if (this._getPoints().length) {
-      this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+      if (this._filterModel.getFilter() !== FilterType.EVERYTHING) {
+        this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+      } else {
+        this.destroy();
+        this.init();
+      }
     } else {
       remove(this._noPointsView);
       this._noPointsView = null;
     }
+  }
+
+  _renderLoading() {
+    render(this._container, this._loadingView, RenderPosition.AFTER_BEGIN);
   }
 
   _getPoints() {
@@ -69,8 +103,7 @@ class Trip {
       case SortType.PRICE:
         return filteredPoints.sort((a, b) => b.price - a.price);
       case SortType.TIME:
-        // TODO: здесь нужна сортировка по продолжительности
-        return filteredPoints.sort((a, b) => a.dates.endDate - b.dates.endDate);
+        return filteredPoints.sort((a, b) => b.duration - a.duration);
     }
 
     return filteredPoints.sort((a, b) => a.dates.startDate - b.dates.startDate);
@@ -79,7 +112,7 @@ class Trip {
   _getUniqueDays() {
     const uniqueDays = [];
     this._getPoints().forEach(({dates}) => {
-      const startDay = dates.startDate.toLocaleDateString(LOCALE);
+      const startDay = dates.startDate.format(`ll`);
       if (uniqueDays.indexOf(startDay) === -1) {
         uniqueDays.push(startDay);
       }
@@ -106,10 +139,10 @@ class Trip {
     this._daysView.getTripPointsLists().forEach((element, i) => {
       let pointsForDay = points;
       if (days.length > 1) {
-        pointsForDay = points.filter(({dates}) => dates.startDate.toLocaleDateString(LOCALE) === days[i]);
+        pointsForDay = points.filter(({dates}) => dates.startDate.format(`ll`) === days[i]);
       }
       pointsForDay.forEach((point) => {
-        const pointPresenter = new PointPresenter(element, this._handleViewAction, this._handleModeChange);
+        const pointPresenter = new PointPresenter(element, this._handleViewAction, this._handleModeChange, this._dictionariesModel);
         pointPresenter.init(point);
         this._pointPresenter[point.id] = pointPresenter;
       });
@@ -139,23 +172,6 @@ class Trip {
     this._pointPresenter = {};
   }
 
-  _renderTrip() {
-    if (this._sortView) {
-      remove(this._sortView);
-      this._sortView = null;
-    }
-
-    if (this._noPointsView) {
-      remove(this._noPointsView);
-      this._noPointsView = null;
-    }
-
-    this._currentSortType = SortType.EVENT;
-
-    this._clearPointsLists();
-    this.init();
-  }
-
   _handleSortPoints(sortType) {
     if (this._currentSortType === sortType) {
       return;
@@ -180,7 +196,13 @@ class Trip {
         this._pointsModel.addPoint(updateType, update);
         break;
       case UserAction.UPDATE_POINT:
-        this._pointsModel.updatePoint(updateType, update);
+        this._api.updatePoint(PointsModel.adaptToServer(update))
+          .then((point) => {
+            this._pointsModel.updatePoint(updateType, point);
+          })
+          .catch((error) => {
+            throw new Error(error);
+          });
         break;
       case UserAction.DELETE_POINT:
         this._pointsModel.deletePoint(updateType, update);
@@ -191,14 +213,16 @@ class Trip {
   _handleModelEvent(updateType, data) {
     switch (updateType) {
       case UpdateType.MAJOR:
-        this._renderTrip();
+        this.destroy();
+        this.init();
         break;
-      // case UpdateType.MINOR:
-      //   this._clearPointsLists();
-      //   this._renderPointsLists();
-      //   break;
-      case UpdateType.PATCH:
+      case UpdateType.MINOR:
         this._pointPresenter[data.id].init(data);
+        break;
+      case UpdateType.INIT:
+        this._isLoading = false;
+        remove(this._loadingView);
+        this._renderTrip();
         break;
     }
   }

@@ -8,4 +8,21 @@ const getRandomInt = (a = 1, b = 0) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-export {getUpperFirst, getRandomInt};
+const debounce = function (callback, wait, immediate) {
+  let timeout;
+  return function (...params) {
+    clearTimeout(timeout);
+    timeout = setTimeout(function () {
+      timeout = null;
+      if (!immediate) {
+        callback.call(null, ...params);
+      }
+    }, wait);
+
+    if (immediate && !timeout) {
+      callback.call(null, ...params);
+    }
+  };
+};
+
+export {getUpperFirst, getRandomInt, debounce};

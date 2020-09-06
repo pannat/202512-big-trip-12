@@ -1,5 +1,3 @@
-const cities = [`Moscow`, `Saratov`, `Kazan`, `Zelenograd`, `Samara`, `Novosibirsk`, `Ufa`];
-
 const eventTypes = {
   transfer: [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`],
   activity: [`check-in`, `sightseeing`, `restaurant`]
@@ -25,9 +23,9 @@ const UserAction = {
 };
 
 const UpdateType = {
-  PATCH: `PATCH`,
   MINOR: `MINOR`,
-  MAJOR: `MAJOR`
+  MAJOR: `MAJOR`,
+  INIT: `INIT`
 };
 
 const FilterType = {
@@ -43,4 +41,4 @@ const MenuItem = {
 
 const POINT_COUNT = 2;
 
-export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, cities, SortType, MenuItem};
+export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, SortType, MenuItem};

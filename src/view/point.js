@@ -4,13 +4,15 @@ import {calculateGroup} from "../utils/point";
 import {groupToPretext} from "../constants";
 import AbstractView from "./abstract";
 
-const createPointTemplate = (type, pretext, destination, startDate, endDate, duration, price, offers) => `
-                <li class="trip-events__item">
+const createPointTemplate = (type, pretext, destination, startDate, endDate, duration, price, offers) => {
+  const title = `${getUpperFirst(type)} ${pretext} ${getUpperFirst(destination.name)}`;
+
+  return `<li class="trip-events__item">
                   <div class="event">
                     <div class="event__type">
                       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                     </div>
-                    <h3 class="event__title">${getUpperFirst(type)} ${pretext} ${getUpperFirst(destination.name)}</h3>
+                    <h3 class="event__title">${title}</h3>
 
                     <div class="event__schedule">
                       <p class="event__time">
@@ -28,7 +30,7 @@ const createPointTemplate = (type, pretext, destination, startDate, endDate, dur
                     <h4 class="visually-hidden">Offers:</h4>
                     <ul class="event__selected-offers">
                       ${offers.map((offer) => `<li class="event__offer">
-                        <span class="event__offer-title">${offer.displayName}</span>
+                        <span class="event__offer-title">${offer.title}</span>
                         &plus;
                         &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
                        </li>`).join(``)}
@@ -39,18 +41,19 @@ const createPointTemplate = (type, pretext, destination, startDate, endDate, dur
                     </button>
                   </div>
                 </li>`.trim();
+};
 
 class Point extends AbstractView {
-  constructor({type, destination, dates, price, offers}) {
+  constructor({type, destination, dates, price, offers, duration}) {
     super();
     this._type = type;
     this._pretext = groupToPretext[calculateGroup(type)];
     this._destination = destination;
     this._startDate = moment(dates.startDate);
     this._endDate = moment(dates.endDate);
-    this._duration = this._calculateDuration();
+    this._duration = this._humanizeDuration(duration);
     this._price = price;
-    this._offers = offers;
+    this._offers = offers.slice(0, 3);
     this._onButtonClick = this._onButtonClick.bind(this);
   }
   setOnButtonClick(callback) {
@@ -65,9 +68,8 @@ class Point extends AbstractView {
     return createPointTemplate(this._type, this._pretext, this._destination, this._startDate, this._endDate, this._duration, this._price, this._offers);
   }
 
-  _calculateDuration() {
+  _humanizeDuration(diff) {
     const setFormatUnitTime = (unit) => unit > 9 ? unit : `0${unit}`;
-    const diff = this._endDate.diff(this._startDate);
 
     const days = setFormatUnitTime(moment.duration(diff).days());
     const hours = setFormatUnitTime(moment.duration(diff).hours());
@@ -75,9 +77,9 @@ class Point extends AbstractView {
 
     let duration = ``;
 
-    if (days) {
+    if (parseInt(days, 10)) {
       duration += `${days}D ${hours}H`;
-    } else if (hours) {
+    } else if (parseInt(hours, 10)) {
       duration += `${hours}H`;
     }
     duration += ` ${minutes}M`;

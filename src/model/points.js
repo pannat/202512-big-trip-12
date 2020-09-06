@@ -1,4 +1,5 @@
 import Observer from "../utils/observer";
+import moment from "moment";
 
 class Points extends Observer {
   constructor() {
@@ -6,8 +7,9 @@ class Points extends Observer {
     this._points = [];
   }
 
-  setPoints(points) {
+  setPoints(updateType, points) {
     this._points = points.slice(0);
+    this._notify(updateType);
   }
 
   getPoints() {
@@ -22,7 +24,6 @@ class Points extends Observer {
 
   updatePoint(updateType, update) {
     const index = this._points.findIndex((item) => item.id === update.id);
-
     if (index === -1) {
       throw new Error(`Can't update unexisting point`);
     }
@@ -49,6 +50,47 @@ class Points extends Observer {
     ];
 
     this._notify(updateType);
+  }
+
+  static adaptToClient(point) {
+    const adaptedPoint = Object.assign(
+        {},
+        point,
+        {
+          dates: {
+            startDate: moment(point[`date_from`]),
+            endDate: moment(point[`date_to`]),
+          },
+          isFavorite: point[`is_favorite`],
+          price: point[`base_price`]
+        }
+    );
+    adaptedPoint.duration = adaptedPoint.dates.endDate.diff(adaptedPoint.dates.startDate);
+    delete adaptedPoint[`date_from`];
+    delete adaptedPoint[`date_to`];
+    delete adaptedPoint[`is_favorite`];
+    delete adaptedPoint[`base_price`];
+
+    return adaptedPoint;
+  }
+
+  static adaptToServer(point) {
+    const adaptedPoint = Object.assign(
+        {},
+        point,
+        {
+          [`date_from`]: point.dates.startDate,
+          [`date_to`]: point.dates.endDate,
+          [`is_favorite`]: point.isFavorite,
+          [`base_price`]: parseInt(point.price, 10)
+        }
+    );
+    delete adaptedPoint.dates;
+    delete adaptedPoint.duration;
+    delete adaptedPoint.isFavorite;
+    delete adaptedPoint.price;
+
+    return adaptedPoint;
   }
 }
 
