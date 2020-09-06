@@ -1,12 +1,13 @@
 import {remove, render, RenderPosition} from "../utils/render";
 import {UserAction, UpdateType} from "../constants";
-import {generateId} from "../mock";
 import PointEdit from "../view/point-edit";
 
 class PointNew {
-  constructor(container, changeData) {
+  constructor(container, changeData, dictionariesModel) {
     this._container = container;
     this._changeData = changeData;
+
+    this._dictionariesModel = dictionariesModel;
 
     this._destroyCallback = null;
     this._pointEditView = null;
@@ -23,7 +24,7 @@ class PointNew {
       return;
     }
 
-    this._pointEditView = new PointEdit();
+    this._pointEditView = new PointEdit(this._dictionariesModel.getDestinations(), this._dictionariesModel.getOffersLists());
     this._pointEditView.setOnFormSubmit(this._handleFormSubmit);
     this._pointEditView.setOnButtonResetClick(this._handleButtonCancelClick);
     this._pointEditView.restoreHandlers();
@@ -42,7 +43,10 @@ class PointNew {
     }
 
     remove(this._pointEditView);
+    this._pointEditView.destroyDataPickers();
     this._pointEditView = null;
+
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
   _handleButtonCancelClick() {
@@ -50,7 +54,6 @@ class PointNew {
   }
 
   _handleFormSubmit(point) {
-    point.id = generateId();
     this._changeData(
         UserAction.ADD_POINT,
         UpdateType.MAJOR,

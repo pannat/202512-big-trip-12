@@ -1,8 +1,9 @@
 import {getUpperFirst} from "../utils/common";
 import {calculateGroup} from "../utils/point";
-import {cities, eventTypes, groupToPretext} from "../constants";
+import {eventTypes, groupToPretext} from "../constants";
 import SmartView from "./smart";
 
+import moment from "moment";
 import flatpickr from "flatpickr";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
@@ -11,8 +12,8 @@ const POINT_BLANK = {
   type: `taxi`,
   price: 0,
   dates: {
-    startDate: new Date(),
-    endDate: new Date()
+    startDate: moment(),
+    endDate: moment()
   },
   destination: {
     name: ``,
@@ -75,13 +76,14 @@ const createDestinationTemplate = (destination) => {
             <p class="event__destination-description">${destination.description}</p>
             <div class="event__photos-container">
               <div class="event__photos-tape">
-                ${destination.pictures.map((photo) => `<img class="event__photo" src="${photo.src}" alt="${photo.description}">`).join(``)}
+                ${destination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join(``)}
               </div>
             </div>
           </section>`;
 };
 
-const createButtonsForEditModeTemplate = (key, isFavorite) => `<input
+const createButtonsForEditModeTemplate = (key, isFavorite) => `
+    <input
       id="event-favorite-${key}"
       class="event__favorite-checkbox  visually-hidden"
       type="checkbox"
@@ -95,15 +97,15 @@ const createButtonsForEditModeTemplate = (key, isFavorite) => `<input
       </label>
       <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Close event</span>
-      </button>`;
+      </button>`.trim();
 
-const createPointTemplate = ({type, pretext, destination, dates, price, offers, isFavorite, key, isNew}, offersList) => {
+const createPointTemplate = ({type, pretext, destination, dates, price, offers, isFavorite, key, isNew}, offersList, destinationList) => {
   const typeDisplay = `${getUpperFirst(type)} ${pretext}`;
   const currentCity = destination && destination.name ? destination.name : ``;
   const buttonResetText = isNew ? `Cancel` : `Delete`;
   const eventTypeListTemplate = createEventTypesListTemplate(type, key);
   const offersTemplate = offersList && offersList.length ? createOffersTemplate(offers, key, offersList) : ``;
-  const destinationTemplate = destination && Object.keys(destination).length ? createDestinationTemplate(destination) : ``;
+  const destinationTemplate = destination && destination.name ? createDestinationTemplate(destination) : ``;
   const buttonsForEditModeTemplate = isNew ? `` : createButtonsForEditModeTemplate(key, isFavorite);
 
   const eventDetailsTemplate = offersTemplate || destinationTemplate ?
@@ -111,6 +113,11 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
         ${offersTemplate}
         ${destinationTemplate}
     </section>`.trim() : ``;
+
+  const destinationsList = `
+            <datalist id="destination-list-${key}">
+              ${destinationList.map((destinationItem) => `<option value="${destinationItem.name}"></option>`).join(``)}
+            </datalist>`.trim();
 
 
   return `<form class="trip-events__item  event  event--edit" action="#" method="post">
@@ -137,9 +144,7 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                     value="${currentCity}"
                     list="destination-list-${key}"
                 >
-                <datalist id="destination-list-${key}">
-                  ${cities.map((city) => `<option value="${city}"></option>`).join(``)}
-                </datalist>
+                ${destinationsList}
               </div>
 
               <div class="event__field-group  event__field-group--time">
@@ -182,7 +187,7 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
 };
 
 class PointEdit extends SmartView {
-  constructor(point = POINT_BLANK, destinations, offersLists) {
+  constructor(destinations, offersLists, point = POINT_BLANK) {
     super();
     this._data = PointEdit.parsePointToData(point);
     this._dictionaries = {
@@ -195,6 +200,8 @@ class PointEdit extends SmartView {
       endDate: null
     };
 
+    this._offersCorrespondingToType = [];
+
     this._onButtonCloseClick = this._onButtonCloseClick.bind(this);
     this._onFavoriteChange = this._onFavoriteChange.bind(this);
     this._onTypeChange = this._onTypeChange.bind(this);
@@ -205,6 +212,7 @@ class PointEdit extends SmartView {
     this._onFormSubmit = this._onFormSubmit.bind(this);
     this._onPriceChange = this._onPriceChange.bind(this);
     this._onApplyOffersChange = this._onApplyOffersChange.bind(this);
+    this.destroyDataPickers = this.destroyDataPickers.bind(this);
 
     this._setInnerHandlers();
   }
@@ -238,15 +246,12 @@ class PointEdit extends SmartView {
   }
 
   reset(point) {
-    this.updateData(PointEdit.parsePointToData(point));
+    this.updateData(PointEdit.parsePointToData(point), true);
+    this.destroyDataPickers();
   }
 
-  _getTemplate() {
-    const [offersCorrespondingToType] = this._dictionaries.offersLists.filter((list) => list.type === this._data.type);
-    return createPointTemplate(this._data, offersCorrespondingToType.offers);
-  }
 
-  _setDatepickers() {
+  destroyDataPickers() {
     Object.values(this._datepicker)
       .forEach((picker) => {
         if (picker) {
@@ -254,13 +259,21 @@ class PointEdit extends SmartView {
           picker = null;
         }
       });
+  }
 
+  _getTemplate() {
+    const [typeOfOffers] = this._dictionaries.offersLists.filter((list) => list.type === this._data.type);
+    this._offersCorrespondingToType = typeOfOffers.offers;
+    return createPointTemplate(this._data, this._offersCorrespondingToType, this._dictionaries.destinations);
+  }
+
+  _setDatepickers() {
     this._datepicker.startDate = flatpickr(
         this.getElement().querySelector(`[name="event-start-time"]`),
         {
           dateFormat: FORMAT_DATEPICKER,
           enableTime: true,
-          defaultDate: this._data.dates.startDate,
+          defaultDate: this._data.dates.startDate.valueOf(),
           [`time_24hr`]: true,
           onChange: this._onStartDatePickerChange,
         }
@@ -272,8 +285,8 @@ class PointEdit extends SmartView {
           dateFormat: FORMAT_DATEPICKER,
           enableTime: true,
           [`time_24hr`]: true,
-          defaultDate: this._data.dates.endDate,
-          minDate: this._data.dates.startDate,
+          defaultDate: this._data.dates.endDate.valueOf(),
+          minDate: this._data.dates.startDate.valueOf(),
           onChange: this._onEndDatePickerChange
         }
     );
@@ -283,7 +296,7 @@ class PointEdit extends SmartView {
     this.getElement().addEventListener(`change`, this._onTypeChange);
     this.getElement().addEventListener(`change`, this._onApplyOffersChange);
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._onDestinationChange);
-    this.getElement().querySelector(`.event__input--price`).addEventListener(`change`, this._onPriceChange);
+    this.getElement().querySelector(`.event__input--price`).addEventListener(`input`, this._onPriceChange);
   }
 
   _onFormSubmit(evt) {
@@ -295,16 +308,12 @@ class PointEdit extends SmartView {
   _onButtonCloseClick(evt) {
     evt.preventDefault();
     this._callback.buttonCloseClick();
-    Object.values(this._datepicker).forEach((datepicker) => {
-      datepicker.destroy();
-      datepicker = null;
-    });
   }
 
   _onFavoriteChange(evt) {
     evt.preventDefault();
     this.updateData({isFavorite: !this._data.isFavorite}, true);
-    this._callback.favoriteChange(this._data.isFavorite);
+    this._callback.favoriteChange(PointEdit.parseDataToPoint(this._data));
   }
 
   _onTypeChange(evt) {
@@ -320,15 +329,8 @@ class PointEdit extends SmartView {
   }
 
   _onDestinationChange(evt) {
-    const index = cities.indexOf(evt.target.value);
-    const city = index > -1 ? evt.target.value : ``;
-    this.updateData({
-      destination: {
-        name: city,
-        description: `New new new`,
-        pictures: []
-      }
-    });
+    const destination = this._dictionaries.destinations.find((it) => it.name === evt.target.value);
+    this.updateData({destination});
   }
 
   _onStartDatePickerChange(value) {
@@ -363,16 +365,22 @@ class PointEdit extends SmartView {
     if (!evt.target.classList.contains(`event__offer-checkbox`)) {
       return;
     }
-    const offers = this._data.offers.map((offer) => {
-      const additionalSource = {};
-      if (offer.name === evt.target.dataset.offerName) {
-        additionalSource.isApply = evt.target.checked;
+
+    let updatedOffers = this._data.offers.slice(0);
+    if (evt.target.checked) {
+      const currentOffer = this._offersCorrespondingToType.find((offer) => offer.title === evt.target.dataset.offerName);
+      if (currentOffer) {
+        updatedOffers.push(currentOffer);
       }
-      return Object.assign({}, offer, additionalSource);
-    });
+    } else {
+      const index = updatedOffers.findIndex((offer) => offer.title === evt.target.dataset.offerName);
+      if (index > -1) {
+        updatedOffers = [...updatedOffers.slice(0, index), ...updatedOffers.slice(index + 1)];
+      }
+    }
 
     this.updateData({
-      offers
+      offers: updatedOffers
     });
   }
 

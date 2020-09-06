@@ -1,7 +1,7 @@
 class Dictionaries {
   constructor() {
     this._destination = null;
-    this._offersList = null;
+    this._offersLists = null;
   }
 
   setDestination(destination) {

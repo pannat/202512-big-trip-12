@@ -33,7 +33,7 @@ class PointPresenter {
     const prevPointEditView = this._pointEditView;
 
     this._pointView = new Point(this._point);
-    this._pointEditView = new PointEdit(this._point, this._dictionariesModel.getDestinations(), this._dictionariesModel.getOffersLists());
+    this._pointEditView = new PointEdit(this._dictionariesModel.getDestinations(), this._dictionariesModel.getOffersLists(), this._point);
     this._pointEditView.setOnFormSubmit(this._handleFormSubmit);
     this._pointEditView.setOnButtonCloseClick(this._replaceFormToCard);
     this._pointEditView.setOnFavoriteChange(this._handleFavoriteClick);
@@ -60,6 +60,7 @@ class PointPresenter {
   destroy() {
     remove(this._pointView);
     remove(this._pointEditView);
+    this._pointEditView.destroyDataPickers();
 
     this._pointView = null;
     this._pointEditView = null;
@@ -87,17 +88,17 @@ class PointPresenter {
     this._mode = Mode.DEFAULT;
   }
 
-  _handleFavoriteClick(isFavorite) {
+  _handleFavoriteClick(update) {
     this._changeData(
         UserAction.UPDATE_POINT,
-        UpdateType.PATCH,
-        Object.assign({}, this._point, {isFavorite}));
+        UpdateType.MINOR,
+        update);
   }
 
   _handleFormSubmit(point) {
     this._changeData(
         UserAction.UPDATE_POINT,
-        UpdateType.PATCH,
+        UpdateType.MINOR,
         point
     );
     this._replaceFormToCard();

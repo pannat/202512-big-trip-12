@@ -25,17 +25,18 @@ class Api {
 
   updatePoint(point) {
     return this._load({
-      url: `/points/${point.id}`,
+      url: `points/${point.id}`,
       method: Method.PUT,
       body: JSON.stringify(point),
       headers: new Headers({"Content-Type": `application/json`})
     })
-      .then(Api.toJSON);
+      .then(Api.toJSON)
+      .then((updatedPoint) => PointModel.adaptToClient(updatedPoint));
   }
 
   deletePoint(id) {
     return this._load({
-      url: `/points/${id}`,
+      url: `points/${id}`,
       method: Method.DELETE,
     })
       .then(Api.toJSON);

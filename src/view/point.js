@@ -4,13 +4,15 @@ import {calculateGroup} from "../utils/point";
 import {groupToPretext} from "../constants";
 import AbstractView from "./abstract";
 
-const createPointTemplate = (type, pretext, destination, startDate, endDate, duration, price, offers) => `
-                <li class="trip-events__item">
+const createPointTemplate = (type, pretext, destination, startDate, endDate, duration, price, offers) => {
+  const title = `${getUpperFirst(type)} ${pretext} ${getUpperFirst(destination.name)}`;
+
+  return `<li class="trip-events__item">
                   <div class="event">
                     <div class="event__type">
                       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                     </div>
-                    <h3 class="event__title">${getUpperFirst(type)} ${pretext} ${getUpperFirst(destination.name)}</h3>
+                    <h3 class="event__title">${title}</h3>
 
                     <div class="event__schedule">
                       <p class="event__time">
@@ -39,6 +41,7 @@ const createPointTemplate = (type, pretext, destination, startDate, endDate, dur
                     </button>
                   </div>
                 </li>`.trim();
+};
 
 class Point extends AbstractView {
   constructor({type, destination, dates, price, offers, duration}) {

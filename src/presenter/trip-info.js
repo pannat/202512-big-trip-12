@@ -24,6 +24,13 @@ class TripInfo {
     render(this._tripInfoView, this._routeView, RenderPosition.AFTER_BEGIN);
   }
 
+  _destroy() {
+    remove(this._tripInfoView);
+    remove(this._routeView);
+    this._tripInfoView = null;
+    this._routeView = null;
+  }
+
   _getPoints() {
     return this._pointsModel.getPoints().sort((a, b) => a.dates.startDate - b.dates.startDate);
   }
@@ -40,12 +47,13 @@ class TripInfo {
 
   _getTotalPrice() {
     const points = this._getPoints();
-    return points.reduce((acc, point) => {
-      let price = parseInt(point.price, 10);
-      point.offers.forEach((offer) => {
-        price += offer.isApply ? parseInt(offer.price, 10) : 0;
-      });
-      return acc + price;
+    return points.reduce((total, point) => {
+      total += parseInt(point.price, 10);
+      total += point.offers.reduce((totalCostOfOffers, offer) => {
+        totalCostOfOffers += parseInt(offer.price, 10);
+        return totalCostOfOffers;
+      }, 0);
+      return total;
     }, 0);
   }
 
@@ -55,11 +63,7 @@ class TripInfo {
   }
 
   _handleModelEvent() {
-    remove(this._tripInfoView);
-    remove(this._routeView);
-    this._tripInfoView = null;
-    this._routeView = null;
-
+    this._destroy();
     this.init();
   }
 }

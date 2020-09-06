@@ -11,7 +11,7 @@ import DictionariesModel from "./model/dictionaries";
 
 import Api from "./api";
 
-import {MenuItem} from "./constants";
+import {MenuItem, UpdateType} from "./constants";
 import {render, RenderPosition, remove} from "./utils/render";
 
 const AUTHORIZATION = `Basic er883jdzbdw`;
@@ -23,20 +23,11 @@ const buttonNewPointElement = tripMainElement.querySelector(`.trip-main__event-a
 const mainBodyElement = document.querySelector(`.page-main .page-body__container`);
 const tripContainerElement = mainBodyElement.querySelector(`.trip-events`);
 
+buttonNewPointElement.disabled = true;
+
 const handlePointNewFormClose = () => {
   buttonNewPointElement.disabled = false;
 };
-
-const api = new Api(END_POINT, AUTHORIZATION);
-const pointsModel = new PointsModel();
-const filterModel = new FilterModel();
-const dictionariesModel = new DictionariesModel();
-const navView = new NavView();
-
-let statsView = null;
-let tripPresenter = null;
-let tripInfoPresenter = null;
-let filterPresenter = null;
 
 const handleMenuItemClick = (menuItem) => {
   switch (menuItem) {
@@ -55,32 +46,45 @@ const handleMenuItemClick = (menuItem) => {
   }
 };
 
+const api = new Api(END_POINT, AUTHORIZATION);
+const pointsModel = new PointsModel();
+const filterModel = new FilterModel();
+const dictionariesModel = new DictionariesModel();
+const navView = new NavView();
 navView.setOnMenuClick(handleMenuItemClick);
 render(controlsElement, navView, RenderPosition.BEFORE_END);
+
+let statsView = null;
+const tripPresenter = new TripPresenter(tripContainerElement, pointsModel, filterModel, dictionariesModel, api);
+const tripInfoPresenter = new TripInfoPresenter(tripMainElement, pointsModel);
+const filterPresenter = new FilterPresenter(controlsElement, pointsModel, filterModel);
+tripPresenter.init();
+tripInfoPresenter.init();
+filterPresenter.init();
+
+Promise.all([
+  api.getDestinations(),
+  api.getOffers()
+])
+  .then(([destination, offersLists]) => {
+    dictionariesModel.setDestination(destination);
+    dictionariesModel.setOffersLists(offersLists);
+
+    api.getPoint()
+      .then((points) => {
+        pointsModel.setPoints(UpdateType.INIT, points);
+        buttonNewPointElement.disabled = false;
+      })
+      .catch((error) => {
+        pointsModel.setPoints(UpdateType.INIT, []);
+        throw new Error(error);
+      });
+  })
+  .catch((error) => {
+    throw new Error(error);
+  });
 
 buttonNewPointElement.addEventListener(`click`, () => {
   tripPresenter.createPoint(handlePointNewFormClose);
   buttonNewPointElement.disabled = true;
 });
-
-Promise.all([
-  api.getPoint(),
-  api.getDestinations(),
-  api.getOffers()
-])
-  .then(([points, destination, offersLists]) => {
-    dictionariesModel.setDestination(destination);
-    dictionariesModel.setOffersLists(offersLists);
-    pointsModel.setPoints(points);
-
-    tripPresenter = new TripPresenter(tripContainerElement, pointsModel, filterModel, dictionariesModel);
-    tripInfoPresenter = new TripInfoPresenter(tripMainElement, pointsModel);
-    filterPresenter = new FilterPresenter(controlsElement, pointsModel, filterModel);
-  })
-  .then(() => {
-    tripInfoPresenter.init();
-    tripPresenter.init();
-    filterPresenter.init();
-  });
-
-
