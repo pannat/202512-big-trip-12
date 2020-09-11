@@ -1,6 +1,6 @@
 import moment from "moment";
 import {getUpperFirst} from "../utils/common";
-import {calculateGroup} from "../utils/point";
+import {calculateGroup, humanizeDuration} from "../utils/point";
 import {groupToPretext} from "../constants";
 import AbstractView from "./abstract";
 
@@ -51,7 +51,7 @@ class Point extends AbstractView {
     this._destination = destination;
     this._startDate = moment(dates.startDate);
     this._endDate = moment(dates.endDate);
-    this._duration = this._humanizeDuration(duration);
+    this._duration = humanizeDuration(duration);
     this._price = price;
     this._offers = offers.slice(0, 3);
     this._onButtonClick = this._onButtonClick.bind(this);
@@ -66,25 +66,6 @@ class Point extends AbstractView {
 
   _getTemplate() {
     return createPointTemplate(this._type, this._pretext, this._destination, this._startDate, this._endDate, this._duration, this._price, this._offers);
-  }
-
-  _humanizeDuration(diff) {
-    const setFormatUnitTime = (unit) => unit > 9 ? unit : `0${unit}`;
-
-    const days = setFormatUnitTime(moment.duration(diff).days());
-    const hours = setFormatUnitTime(moment.duration(diff).hours());
-    const minutes = setFormatUnitTime(moment.duration(diff).minutes());
-
-    let duration = ``;
-
-    if (parseInt(days, 10)) {
-      duration += `${days}D ${hours}H`;
-    } else if (parseInt(hours, 10)) {
-      duration += `${hours}H`;
-    }
-    duration += ` ${minutes}M`;
-
-    return duration;
   }
 
   _onButtonClick(evt) {
