@@ -3,6 +3,7 @@ import PointModel from "./model/points";
 const Method = {
   GET: `GET`,
   PUT: `PUT`,
+  POST: `POST`,
   DELETE: `DELETE`
 };
 
@@ -23,6 +24,17 @@ class Api {
       .then((points) => points.map(PointModel.adaptToClient));
   }
 
+  addPoint(point) {
+    return this._load({
+      url: `points`,
+      method: Method.POST,
+      body: JSON.stringify(point),
+      headers: new Headers({"Content-Type": `application/json`})
+    })
+      .then(Api.toJSON)
+      .then((updatedPoint) => PointModel.adaptToClient(updatedPoint));
+  }
+
   updatePoint(point) {
     return this._load({
       url: `points/${point.id}`,
@@ -38,8 +50,7 @@ class Api {
     return this._load({
       url: `points/${id}`,
       method: Method.DELETE,
-    })
-      .then(Api.toJSON);
+    });
   }
 
   getDestinations() {

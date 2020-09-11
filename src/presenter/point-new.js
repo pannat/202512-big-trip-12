@@ -49,6 +49,20 @@ class PointNew {
     document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
+  setSaving() {
+    this._pointEditView.updateData({
+      isDisabled: true,
+      isSaving: true
+    });
+  }
+
+  setAborting() {
+    this._pointEditView.updateData({
+      isDisabled: false,
+      isSaving: false
+    });
+  }
+
   _handleButtonCancelClick() {
     this.destroy();
   }
@@ -59,8 +73,6 @@ class PointNew {
         UpdateType.MAJOR,
         point
     );
-
-    this.destroy();
   }
 
   _onEscKeyDown(evt) {
