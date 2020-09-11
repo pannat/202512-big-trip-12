@@ -1,4 +1,5 @@
 import {eventTypes} from "../constants";
+import moment from "moment";
 
 const calculateGroup = (type) => {
   let group = ``;
@@ -10,4 +11,23 @@ const calculateGroup = (type) => {
   return group;
 };
 
-export {calculateGroup};
+const humanizeDuration = (diff) => {
+  const setFormatUnitTime = (unit) => unit > 9 ? unit : `0${unit}`;
+
+  const days = setFormatUnitTime(moment.duration(diff).days());
+  const hours = setFormatUnitTime(moment.duration(diff).hours());
+  const minutes = setFormatUnitTime(moment.duration(diff).minutes());
+
+  let duration = ``;
+
+  if (parseInt(days, 10)) {
+    duration += `${days}D ${hours}H`;
+  } else if (parseInt(hours, 10)) {
+    duration += `${hours}H`;
+  }
+  duration += ` ${minutes}M`;
+
+  return duration;
+};
+
+export {calculateGroup, humanizeDuration};

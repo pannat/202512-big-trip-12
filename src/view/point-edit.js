@@ -8,19 +8,19 @@ import flatpickr from "flatpickr";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 const POINT_BLANK = {
-  id: null,
   type: `taxi`,
   price: 0,
   dates: {
     startDate: moment(),
-    endDate: moment()
+    endDate: moment().add(1, `days`)
   },
   destination: {
     name: ``,
     description: ``,
     photos: []
   },
-  offers: []
+  offers: [],
+  isFavorite: false
 };
 
 const FORMAT_DATEPICKER = `d/m/Y H:S`;
@@ -46,7 +46,7 @@ const createEventTypesListTemplate = (currentType, key) => `
                   .join(``)
                   .trim()}`;
 
-const createOffersTemplate = (selectedOffers, key, offersList) => {
+const createOffersTemplate = (selectedOffers, key, offersList, isDisabled) => {
   return `<section class="event__section  event__section--offers">
                 <h3 class="event__section-title  event__section-title--offers">Offers</h3>
                  <div class="event__available-offers">
@@ -57,8 +57,9 @@ const createOffersTemplate = (selectedOffers, key, offersList) => {
                                         type="checkbox"
                                         name="event-offer-${offer.title}"
                                         data-offer-name="${offer.title}"
-                                        ${selectedOffers.some((selectedOffer) => selectedOffer.title === offer.title) ? `checked` : ``}>
-
+                                        ${selectedOffers.some((selectedOffer) => selectedOffer.title === offer.title) ? `checked` : ``}
+                                        ${isDisabled ? `disabled` : ``}
+                                        >
                                     <label class="event__offer-label" for="event-offer-${offer.title}-${key}">
                                       <span class="event__offer-title">${getUpperFirst(offer.title)}</span>
                                       &plus;
@@ -82,13 +83,15 @@ const createDestinationTemplate = (destination) => {
           </section>`;
 };
 
-const createButtonsForEditModeTemplate = (key, isFavorite) => `
+const createButtonsForEditModeTemplate = (key, isFavorite, isDisabled) => `
     <input
       id="event-favorite-${key}"
       class="event__favorite-checkbox  visually-hidden"
       type="checkbox"
       name="event-favorite"
-      ${isFavorite ? `Checked` : ``}>
+      ${isFavorite ? `Checked` : ``}
+      ${isDisabled ? `disabled` : ``}
+      >
       <label class="event__favorite-btn" for="event-favorite-${key}">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
@@ -99,14 +102,18 @@ const createButtonsForEditModeTemplate = (key, isFavorite) => `
           <span class="visually-hidden">Close event</span>
       </button>`.trim();
 
-const createPointTemplate = ({type, pretext, destination, dates, price, offers, isFavorite, key, isNew}, offersList, destinationList) => {
+const createPointTemplate = ({type, pretext, destination, dates, price, offers, isFavorite, key, isNew, isSaving, isDeleting, isDisabled}, offersList, destinationList) => {
   const typeDisplay = `${getUpperFirst(type)} ${pretext}`;
   const currentCity = destination && destination.name ? destination.name : ``;
-  const buttonResetText = isNew ? `Cancel` : `Delete`;
+
+  let buttonResetText = `Cancel`;
+  if (!isNew) {
+    buttonResetText = isDeleting ? `Deleting…` : `Delete`;
+  }
   const eventTypeListTemplate = createEventTypesListTemplate(type, key);
-  const offersTemplate = offersList && offersList.length ? createOffersTemplate(offers, key, offersList) : ``;
+  const offersTemplate = offersList && offersList.length ? createOffersTemplate(offers, key, offersList, isDisabled) : ``;
   const destinationTemplate = destination && destination.name ? createDestinationTemplate(destination) : ``;
-  const buttonsForEditModeTemplate = isNew ? `` : createButtonsForEditModeTemplate(key, isFavorite);
+  const buttonsForEditModeTemplate = isNew ? `` : createButtonsForEditModeTemplate(key, isFavorite, isDisabled);
 
   const eventDetailsTemplate = offersTemplate || destinationTemplate ?
     `<section class="event__details">
@@ -127,7 +134,11 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                   <span class="visually-hidden">Choose event type</span>
                   <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
                 </label>
-                <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${key}" type="checkbox">
+                <input
+                class="event__type-toggle visually-hidden"
+                id="event-type-toggle-${key}"
+                type="checkbox"
+                ${isDisabled ? `disabled` : ``}>
 
                 <div class="event__type-list">
                   ${eventTypeListTemplate}
@@ -138,11 +149,13 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                 <label class="event__label  event__type-output" for="event-destination-${key}">
                   ${typeDisplay}
                 </label>
-                <input class="event__input  event__input--destination"
+                <input
+                    class="event__input  event__input--destination"
                     id="event-destination-${key}"
                     type="text" name="event-destination"
                     value="${currentCity}"
                     list="destination-list-${key}"
+                    ${isDisabled ? `disabled` : ``}
                 >
                 ${destinationsList}
               </div>
@@ -156,7 +169,9 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                     id="event-start-time-${key}"
                     type="text"
                     name="event-start-time"
-                    value="${dates.startDate}">
+                    value="${dates.startDate}"
+                    ${isDisabled ? `disabled` : ``}
+                >
                 &mdash;
                 <label class="visually-hidden" for="event-end-time-${key}">
                   To
@@ -167,6 +182,7 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                     type="text"
                     name="event-end-time"
                     value="${dates.endDate}"
+                    ${isDisabled ? `disabled` : ``}
                 >
               </div>
 
@@ -175,11 +191,28 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                   <span class="visually-hidden">Price</span>
                   &euro;
                 </label>
-                <input class="event__input  event__input--price" id="event-price-${key}" type="text" name="event-price" value="${price}">
+                <input
+                    class="event__input  event__input--price"
+                    id="event-price-${key}"
+                    type="text"
+                    name="event-price"
+                    value="${price}"
+                    ${isDisabled ? `disabled` : ``}
+                >
               </div>
 
-              <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-              <button class="event__reset-btn" type="reset">${buttonResetText}</button>
+              <button
+                class="event__save-btn btn btn--blue"
+                type="submit"
+                ${isDisabled ? `disabled` : ``}
+              >
+                ${isSaving ? `Saving…` : `Save`}
+              </button>
+              <button
+                class="event__reset-btn"
+                type="reset"
+                ${isDisabled ? `disabled` : ``}
+              >${buttonResetText}</button>
               ${buttonsForEditModeTemplate}
             </header>
             ${eventDetailsTemplate}
@@ -250,7 +283,6 @@ class PointEdit extends SmartView {
     this.destroyDataPickers();
   }
 
-
   destroyDataPickers() {
     Object.values(this._datepicker)
       .forEach((picker) => {
@@ -268,6 +300,8 @@ class PointEdit extends SmartView {
   }
 
   _setDatepickers() {
+    this.destroyDataPickers();
+
     this._datepicker.startDate = flatpickr(
         this.getElement().querySelector(`[name="event-start-time"]`),
         {
@@ -301,7 +335,6 @@ class PointEdit extends SmartView {
 
   _onFormSubmit(evt) {
     evt.preventDefault();
-
     this._callback.formSubmit(PointEdit.parsePointToData(this._data));
   }
 
@@ -393,9 +426,12 @@ class PointEdit extends SmartView {
         {},
         point,
         {
-          isNew: point.id === null,
-          key: point.id === null ? `new` : point.id,
-          pretext: groupToPretext[calculateGroup(point.type)]
+          isNew: !point.id,
+          key: point.id ? `new` : point.id,
+          pretext: groupToPretext[calculateGroup(point.type)],
+          isSaving: false,
+          isDeleting: false,
+          isDisabled: false
         }
     );
   }
@@ -405,6 +441,10 @@ class PointEdit extends SmartView {
     delete data.isNew;
     delete data.key;
     delete data.pretext;
+    delete data.isSaving;
+    delete data.isDeleting;
+    delete data.isDisabled;
+
     return data;
   }
 }

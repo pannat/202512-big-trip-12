@@ -5,7 +5,7 @@ import {filter} from "../utils/filter";
 import {SortType, UserAction, UpdateType, FilterType} from "../constants";
 import NoPoints from "../view/no-points";
 import Sort from "../view/sort";
-import PointPresenter from "./point";
+import PointPresenter, {State as PointPresenterViewState} from "./point";
 import PointNew from "./point-new";
 
 import PointsModel from "../model/points";
@@ -63,21 +63,34 @@ class Trip {
   }
 
   destroy() {
-    if (this._getPoints().length) {
+    if (this._daysView) {
+      this._clearPointsLists();
+    }
+
+    if (this._sortView) {
       remove(this._sortView);
       this._sortView = null;
       this._currentSortType = SortType.EVENT;
-      this._clearPointsLists();
-      this._pointsModel.removeObserver(this._handleModelEvent);
-      this._filterModel.removeObserver(this._handleModelEvent);
-    } else {
+    }
+
+    if (this._noPointsView) {
       remove(this._noPointsView);
       this._noPointsView = null;
     }
+
+    this._pointsModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
   }
 
   createPoint(callback) {
-    this._pointNewPresenter.init(callback);
+    const handleCloseCreatePoint = () => {
+      if (!this._getPoints().length) {
+        this._renderNoPoints();
+      }
+      callback();
+    };
+
+    this._pointNewPresenter.init(handleCloseCreatePoint);
     if (this._getPoints().length) {
       if (this._filterModel.getFilter() !== FilterType.EVERYTHING) {
         this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
@@ -162,10 +175,8 @@ class Trip {
   }
 
   _clearPointsLists() {
-    if (this._daysView) {
-      remove(this._daysView);
-      this._daysView = null;
-    }
+    remove(this._daysView);
+    this._daysView = null;
 
     Object.values(this._pointPresenter)
       .forEach((presenter) => presenter.destroy());
@@ -193,19 +204,37 @@ class Trip {
   _handleViewAction(actionType, updateType, update) {
     switch (actionType) {
       case UserAction.ADD_POINT:
-        this._pointsModel.addPoint(updateType, update);
+        this._pointNewPresenter.setSaving();
+        this._api.addPoint(PointsModel.adaptToServer(update))
+          .then((point) => {
+            this._pointsModel.addPoint(updateType, point);
+            this._pointNewPresenter.destroy();
+          })
+          .catch(() => {
+            this._pointNewPresenter.setAborting();
+          });
         break;
+
       case UserAction.UPDATE_POINT:
+        this._pointPresenter[update.id].setViewState(PointPresenterViewState.SAVING);
         this._api.updatePoint(PointsModel.adaptToServer(update))
           .then((point) => {
             this._pointsModel.updatePoint(updateType, point);
           })
-          .catch((error) => {
-            throw new Error(error);
+          .catch(() => {
+            this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
           });
         break;
+
       case UserAction.DELETE_POINT:
-        this._pointsModel.deletePoint(updateType, update);
+        this._pointPresenter[update.id].setViewState(PointPresenterViewState.DELETING);
+        this._api.deletePoint(update.id)
+          .then(() => {
+            this._pointsModel.deletePoint(updateType, update);
+          })
+          .catch(() => {
+            this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
+          });
         break;
     }
   }

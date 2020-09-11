@@ -2,15 +2,22 @@ import AbstractView from "./abstract";
 import Chart from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import {eventTypes} from "../constants";
+import {humanizeDuration} from "../utils/point";
 
-const createMoneyChart = (selector, data) => {
+const Titles = {
+  TIME_SPEND: `TIME-SPEND`,
+  TRANSPORT: `TRANSPORT`,
+  MONEY: `MONEY`
+};
+
+const createChart = (selector, LabelToData, title, formatter) => {
   return new Chart(selector, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
     data: {
-      labels: [`✈️ FLIGHT`, `TAXI`, `BUS`, `SHIP`, `TRANSPORT`, `TRAIN`, `DRIVE`, `CHECK-IN`, `SIGHTSEEING`, `RESTAURANT`],
+      labels: Object.keys(LabelToData),
       datasets: [{
-        data,
+        data: Object.values(LabelToData),
         backgroundColor: `#ffffff`,
         hoverBackgroundColor: `#ffffff`,
         anchor: `start`
@@ -25,12 +32,12 @@ const createMoneyChart = (selector, data) => {
           color: `#000000`,
           anchor: `end`,
           align: `start`,
-          formatter: (val) => `€ ${val}`
+          formatter
         }
       },
       title: {
         display: true,
-        text: `MONEY`,
+        text: title,
         fontColor: `#000000`,
         fontSize: 23,
         position: `left`
@@ -69,73 +76,6 @@ const createMoneyChart = (selector, data) => {
     }
   });
 };
-const createTransportChart = (selector, data) => {
-  return new Chart(selector, {
-    plugins: [ChartDataLabels],
-    type: `horizontalBar`,
-    data: {
-      labels: [`✈️ FLIGHT`, `TAXI`, `BUS`, `SHIP`, `TRANSPORT`, `TRAIN`, `DRIVE`],
-      datasets: [{
-        data,
-        backgroundColor: `#ffffff`,
-        hoverBackgroundColor: `#ffffff`,
-        anchor: `start`
-      }]
-    },
-    options: {
-      plugins: {
-        datalabels: {
-          font: {
-            size: 13
-          },
-          color: `#000000`,
-          anchor: `end`,
-          align: `start`,
-          formatter: (val) => `${val}x`
-        }
-      },
-      title: {
-        display: true,
-        text: `TRANSPORT`,
-        fontColor: `#000000`,
-        fontSize: 23,
-        position: `left`
-      },
-      scales: {
-        yAxes: [{
-          ticks: {
-            fontColor: `#000000`,
-            padding: 5,
-            fontSize: 13,
-          },
-          gridLines: {
-            display: false,
-            drawBorder: false
-          },
-          barThickness: 44,
-        }],
-        xAxes: [{
-          ticks: {
-            display: false,
-            beginAtZero: true,
-          },
-          gridLines: {
-            display: false,
-            drawBorder: false
-          },
-          minBarLength: 50
-        }],
-      },
-      legend: {
-        display: false
-      },
-      tooltips: {
-        enabled: false,
-      }
-    }
-  });
-};
-// TODO: Возможно получиться сделать одну функцию getConfig? Arguments: data, text, labels, formatter;
 
 const createStatsTemplate = () => `
         <section class="statistics">
@@ -162,10 +102,17 @@ class Stats extends AbstractView {
     this._setCharts();
   }
 
-  _getMoneyData(type) {
+  _getTotalMoney(type) {
     return this._points.reduce((acc, point) => {
       let price = point.type === type ? parseInt(point.price, 10) : 0;
       return acc + price;
+    }, 0);
+  }
+
+  _getTotalDuration(type) {
+    return this._points.reduce((acc, point) => {
+      let duration = point.type === type ? point.duration : 0;
+      return acc + duration;
     }, 0);
   }
 
@@ -181,10 +128,36 @@ class Stats extends AbstractView {
 
     let types = Object.values(eventTypes);
     types = [...types[0], ...types[1]];
-    const moneyChartData = types.map((type) => this._getMoneyData(type));
-    createMoneyChart(moneyCtx, moneyChartData);
-    const transportChartData = types.map((type) => this._points.filter((point) => point.type === type).length);
-    createTransportChart(transportCtx, transportChartData);
+
+    const TypeToMoney = types.reduce((acc, type) => {
+      const money = this._getTotalMoney(type);
+      if (money) {
+        acc[type.toUpperCase()] = money;
+      }
+      return acc;
+    }, {});
+
+    const TypeToNumberOfTrips = eventTypes.transfer.reduce((acc, type) => {
+      const count = this._points.filter((point) => point.type === type).length;
+      if (count) {
+        acc[type.toUpperCase()] = count;
+      }
+
+      return acc;
+    }, {});
+
+    const TypeToDuration = types.reduce((acc, type) => {
+      const duration = this._getTotalDuration(type);
+      if (duration) {
+        acc[type.toUpperCase()] = duration;
+      }
+
+      return acc;
+    }, {});
+
+    createChart(moneyCtx, TypeToMoney, Titles.MONEY, (val) => `€ ${val}`);
+    createChart(transportCtx, TypeToNumberOfTrips, Titles.TRANSPORT, (val) => `${val}x`);
+    createChart(timeSpendCtx, TypeToDuration, Titles.TIME_SPEND, humanizeDuration);
   }
 
   _getTemplate() {

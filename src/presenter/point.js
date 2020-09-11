@@ -3,6 +3,12 @@ import PointEdit from "../view/point-edit";
 import {RenderPosition, render, replace, remove} from "../utils/render";
 import {UpdateType, UserAction} from "../constants";
 
+const State = {
+  DELETING: `DELETING`,
+  SAVING: `SAVING`,
+  ABORTING: `ABORTING`
+};
+
 const Mode = {
   DEFAULT: `DEFAULT`,
   EDITING: `EDITING`
@@ -58,9 +64,9 @@ class PointPresenter {
   }
 
   destroy() {
+    this._pointEditView.destroyDataPickers();
     remove(this._pointView);
     remove(this._pointEditView);
-    this._pointEditView.destroyDataPickers();
 
     this._pointView = null;
     this._pointEditView = null;
@@ -69,6 +75,34 @@ class PointPresenter {
   resetView() {
     if (this._mode === Mode.EDITING) {
       this._replaceFormToCard();
+    }
+  }
+
+  setViewState(state) {
+    const resetFormState = () => {
+      this._pointEditView.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._pointEditView.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case State.DELETING:
+        this._pointEditView.updateData({
+          isDisabled: true,
+          isDeleting: true
+        });
+        break;
+      case State.ABORTING:
+        this._pointEditView.shake(resetFormState);
+        break;
     }
   }
 
@@ -98,10 +132,9 @@ class PointPresenter {
   _handleFormSubmit(point) {
     this._changeData(
         UserAction.UPDATE_POINT,
-        UpdateType.MINOR,
+        UpdateType.MAJOR,
         point
     );
-    this._replaceFormToCard();
   }
 
   _handleButtonDeleteClick(point) {
@@ -120,4 +153,5 @@ class PointPresenter {
   }
 }
 
-export default PointPresenter;
+export {State, PointPresenter as default};
+

@@ -1,6 +1,7 @@
 import {render, remove, RenderPosition} from "../utils/render";
 import Route from "../view/route";
 import TripInfoView from "../view/trip-info";
+import {UpdateType} from "../constants";
 
 class TripInfo {
   constructor(container, pointsModel) {
@@ -62,7 +63,12 @@ class TripInfo {
     return this._getPoints().length ? [this._getPoints()[0].dates.startDate, sortedPointsByEndDate[0].dates.endDate] : ``;
   }
 
-  _handleModelEvent() {
+  _handleModelEvent(updateType) {
+    if (updateType === UpdateType.MINOR ||
+    updateType === UpdateType.PATCH) {
+      return;
+    }
+
     this._destroy();
     this.init();
   }

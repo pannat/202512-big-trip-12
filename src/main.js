@@ -14,7 +14,7 @@ import Api from "./api";
 import {MenuItem, UpdateType} from "./constants";
 import {render, RenderPosition, remove} from "./utils/render";
 
-const AUTHORIZATION = `Basic er883jdzbdw`;
+const AUTHORIZATION = `Basic er835jdzbdw`;
 const END_POINT = `https://12.ecmascript.pages.academy/big-trip`;
 
 const tripMainElement = document.querySelector(`.trip-main`);

@@ -1,6 +1,6 @@
 const eventTypes = {
   transfer: [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`],
-  activity: [`check-in`, `sightseeing`, `restaurant`]
+  activity: [`check`, `sightseeing`, `restaurant`]
 };
 
 const SortType = {
@@ -14,8 +14,6 @@ const groupToPretext = {
   activity: `in`
 };
 
-const LOCALE = `en-US`;
-
 const UserAction = {
   UPDATE_POINT: `UPDATE_POINT`,
   ADD_POINT: `ADD_POINT`,
@@ -25,6 +23,7 @@ const UserAction = {
 const UpdateType = {
   MINOR: `MINOR`,
   MAJOR: `MAJOR`,
+  PATCH: `PATCH`,
   INIT: `INIT`
 };
 
@@ -39,6 +38,4 @@ const MenuItem = {
   STATS: `stats`
 };
 
-const POINT_COUNT = 2;
-
-export {POINT_COUNT, LOCALE, UserAction, UpdateType, FilterType, groupToPretext, eventTypes, SortType, MenuItem};
+export {UserAction, UpdateType, FilterType, groupToPretext, eventTypes, SortType, MenuItem};
