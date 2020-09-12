@@ -10,14 +10,39 @@ const Titles = {
   MONEY: `MONEY`
 };
 
-const createChart = (selector, LabelToData, title, formatter) => {
+class ChartData {
+  constructor() {
+    this._labels = [];
+    this._data = [];
+  }
+
+  getLabels() {
+    return this._labels;
+  }
+
+  getData() {
+    return this._data;
+  }
+
+  addLabel(label) {
+    this._labels.push(label);
+  }
+
+  addData(data) {
+    this._data.push(data);
+  }
+}
+
+const createChart = (selector, chartData, title, formatter) => {
+  const labels = chartData.getLabels().map((label) => label.toUpperCase());
+
   return new Chart(selector, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
     data: {
-      labels: Object.keys(LabelToData),
+      labels,
       datasets: [{
-        data: Object.values(LabelToData),
+        data: chartData.getData(),
         backgroundColor: `#ffffff`,
         hoverBackgroundColor: `#ffffff`,
         anchor: `start`
@@ -99,6 +124,9 @@ class Stats extends AbstractView {
     super();
     this._points = points;
 
+    this._getTotalMoney = this._getTotalMoney.bind(this);
+    this._getTotalDuration = this._getTotalDuration.bind(this);
+    this._getTotalNumberOfTrips = this._getTotalNumberOfTrips.bind(this);
     this._setCharts();
   }
 
@@ -116,48 +144,52 @@ class Stats extends AbstractView {
     }, 0);
   }
 
+  _getTotalNumberOfTrips(type) {
+    return this._points.filter((point) => point.type === type).length;
+  }
+
   _setCharts() {
     const moneyCtx = this.getElement().querySelector(`.statistics__chart--money`);
     const transportCtx = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeSpendCtx = this.getElement().querySelector(`.statistics__chart--time`);
 
     const BAR_HEIGHT = 55;
+
+    const transformData = (acc, type, callback) => {
+      const item = callback(type);
+      if (item) {
+        acc.addLabel(type);
+        acc.addData(item);
+      }
+      return acc;
+    };
+
     moneyCtx.height = BAR_HEIGHT * 6;
     transportCtx.height = BAR_HEIGHT * 4;
     timeSpendCtx.height = BAR_HEIGHT * 4;
 
-    let types = Object.values(eventTypes);
-    types = [...types[0], ...types[1]];
 
-    const TypeToMoney = types.reduce((acc, type) => {
-      const money = this._getTotalMoney(type);
-      if (money) {
-        acc[type.toUpperCase()] = money;
-      }
+    let typesGroups = Object.values(eventTypes);
+    const types = typesGroups.reduce((acc, group) => {
+      acc.push(...group);
       return acc;
-    }, {});
+    }, []);
 
-    const TypeToNumberOfTrips = eventTypes.transfer.reduce((acc, type) => {
-      const count = this._points.filter((point) => point.type === type).length;
-      if (count) {
-        acc[type.toUpperCase()] = count;
-      }
+    const moneyChartData = types.reduce((acc, type) => {
+      return transformData(acc, type, this._getTotalMoney);
+    }, new ChartData());
 
-      return acc;
-    }, {});
+    const transportChartData = eventTypes.transfer.reduce((acc, type) => {
+      return transformData(acc, type, this._getTotalNumberOfTrips);
+    }, new ChartData());
 
-    const TypeToDuration = types.reduce((acc, type) => {
-      const duration = this._getTotalDuration(type);
-      if (duration) {
-        acc[type.toUpperCase()] = duration;
-      }
+    const timeSpendChartData = types.reduce((acc, type) => {
+      return transformData(acc, type, this._getTotalDuration);
+    }, new ChartData());
 
-      return acc;
-    }, {});
-
-    createChart(moneyCtx, TypeToMoney, Titles.MONEY, (val) => `€ ${val}`);
-    createChart(transportCtx, TypeToNumberOfTrips, Titles.TRANSPORT, (val) => `${val}x`);
-    createChart(timeSpendCtx, TypeToDuration, Titles.TIME_SPEND, humanizeDuration);
+    createChart(moneyCtx, moneyChartData, Titles.MONEY, (val) => `€ ${val}`);
+    createChart(transportCtx, transportChartData, Titles.TRANSPORT, (val) => `${val}x`);
+    createChart(timeSpendCtx, timeSpendChartData, Titles.TIME_SPEND, humanizeDuration);
   }
 
   _getTemplate() {
