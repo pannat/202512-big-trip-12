@@ -9,7 +9,7 @@ import PointsModel from "./model/points";
 import FilterModel from "./model/filter";
 import DictionariesModel from "./model/dictionaries";
 
-import Api from "./api";
+import Api from "./api/api";
 
 import {MenuItem, UpdateType} from "./constants";
 import {render, RenderPosition, remove} from "./utils/render";
@@ -87,4 +87,13 @@ Promise.all([
 buttonNewPointElement.addEventListener(`click`, () => {
   tripPresenter.createPoint(handlePointNewFormClose);
   buttonNewPointElement.disabled = true;
+});
+
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`/sw.js`)
+    .then(() => {
+      console.log(`ServiceWorker available`);
+    }).catch(() => {
+      console.error(`ServiceWorker isn't available`);
+    });
 });
