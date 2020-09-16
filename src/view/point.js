@@ -53,7 +53,7 @@ class Point extends AbstractView {
     this._endDate = moment(dates.endDate);
     this._duration = humanizeDuration(duration);
     this._price = price;
-    this._offers = offers.slice(0, 3);
+    this._offers = offers.length ? offers.slice(0, 3) : [];
     this._onButtonClick = this._onButtonClick.bind(this);
   }
   setOnButtonClick(callback) {

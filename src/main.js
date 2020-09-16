@@ -10,12 +10,17 @@ import FilterModel from "./model/filter";
 import DictionariesModel from "./model/dictionaries";
 
 import Api from "./api/api";
+import Store from "./api/store";
+import Provider from "./api/provider";
 
 import {MenuItem, UpdateType} from "./constants";
 import {render, RenderPosition, remove} from "./utils/render";
 
 const AUTHORIZATION = `Basic er835jdzbdw`;
 const END_POINT = `https://12.ecmascript.pages.academy/big-trip`;
+const STORE_PREFIX = `bigtrip-localstorage`;
+const STORE_VER = `v12`;
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
 
 const tripMainElement = document.querySelector(`.trip-main`);
 const controlsElement = tripMainElement.querySelector(`.trip-controls`);
@@ -45,8 +50,10 @@ const handleMenuItemClick = (menuItem) => {
       break;
   }
 };
-
 const api = new Api(END_POINT, AUTHORIZATION);
+const store = new Store(window.localStorage, STORE_NAME);
+const apiWithProvider = new Provider(api, store);
+
 const pointsModel = new PointsModel();
 const filterModel = new FilterModel();
 const dictionariesModel = new DictionariesModel();
@@ -55,7 +62,7 @@ navView.setOnMenuClick(handleMenuItemClick);
 render(controlsElement, navView, RenderPosition.BEFORE_END);
 
 let statsView = null;
-const tripPresenter = new TripPresenter(tripContainerElement, pointsModel, filterModel, dictionariesModel, api);
+const tripPresenter = new TripPresenter(tripContainerElement, pointsModel, filterModel, dictionariesModel, apiWithProvider);
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, pointsModel);
 const filterPresenter = new FilterPresenter(controlsElement, pointsModel, filterModel);
 tripPresenter.init();
@@ -70,12 +77,13 @@ Promise.all([
     dictionariesModel.setDestination(destination);
     dictionariesModel.setOffersLists(offersLists);
 
-    api.getPoint()
+    apiWithProvider.getPoints()
       .then((points) => {
         pointsModel.setPoints(UpdateType.INIT, points);
         buttonNewPointElement.disabled = false;
       })
       .catch((error) => {
+        buttonNewPointElement.disabled = false;
         pointsModel.setPoints(UpdateType.INIT, []);
         throw new Error(error);
       });
@@ -89,11 +97,23 @@ buttonNewPointElement.addEventListener(`click`, () => {
   buttonNewPointElement.disabled = true;
 });
 
-window.addEventListener(`load`, () => {
-  navigator.serviceWorker.register(`/sw.js`)
-    .then(() => {
-      console.log(`ServiceWorker available`);
-    }).catch(() => {
-      console.error(`ServiceWorker isn't available`);
-    });
-});
+// window.addEventListener(`load`, () => {
+//   navigator.serviceWorker.register(`/sw.js`)
+//     .then(() => {
+//       console.log(`ServiceWorker available`);
+//     }).catch(() => {
+//       console.error(`ServiceWorker isn't available`);
+//     });
+// });
+
+// window.addEventListener(`online`, () => {
+//   document.title = document.title.replace(` [offline]`, ``);
+//   apiWithProvider.syncPoints()
+//     .then((points) => pointsModel.setPoints(UpdateType.MAJOR, points));
+// });
+//
+// window.addEventListener(`offline`, () => {
+//   document.title += ` [offline]`;
+// });
+
+

@@ -55,7 +55,7 @@ self.addEventListener(`activate`, (evt) => {
 
 const handleFetch = (evt) => {
   const {request} = evt;
-
+  console.log(evt)
   evt.respondWith(
       caches.match(request)
       .then((cacheResponse) => {

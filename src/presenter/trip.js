@@ -210,7 +210,7 @@ class Trip {
             this._pointsModel.addPoint(updateType, point);
             this._pointNewPresenter.destroy();
           })
-          .catch(() => {
+          .catch((error) => {
             this._pointNewPresenter.setAborting();
           });
         break;

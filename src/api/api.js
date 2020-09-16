@@ -18,7 +18,7 @@ class Api {
     this._authorization = authorization;
   }
 
-  getPoint() {
+  getPoints() {
     return this._load({url: `points`})
       .then(Api.toJSON)
       .then((points) => points.map(PointModel.adaptToClient));
@@ -53,6 +53,15 @@ class Api {
     });
   }
 
+  syncPoints(points) {
+    return this._load({
+      url: `points/sync`,
+      method: Method.POST,
+      body: JSON.stringify(points),
+      headers: new Headers({"Content-Type": `application/json`})
+    });
+  }
+
   getDestinations() {
     return this._load({url: `destinations`})
       .then(Api.toJSON);
@@ -80,7 +89,7 @@ class Api {
 
   static checkStatus(response) {
     if (
-      response.status < SuccessHTTPStatusRange.MIN &&
+      response.status < SuccessHTTPStatusRange.MIN ||
       response.status > SuccessHTTPStatusRange.MAX
     ) {
       throw new Error(`${response.status}:${response.statusText}`);

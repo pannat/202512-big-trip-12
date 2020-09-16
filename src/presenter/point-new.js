@@ -57,10 +57,14 @@ class PointNew {
   }
 
   setAborting() {
-    this._pointEditView.updateData({
-      isDisabled: false,
-      isSaving: false
-    });
+    const resetFormState = () => {
+      this._pointEditView.updateData({
+        isDisabled: false,
+        isSaving: false
+      });
+    };
+
+    this._pointEditView.shake(resetFormState);
   }
 
   _handleButtonCancelClick() {

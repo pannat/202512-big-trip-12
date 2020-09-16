@@ -175,17 +175,11 @@ class Stats extends AbstractView {
       return acc;
     }, []);
 
-    const moneyChartData = types.reduce((acc, type) => {
-      return transformData(acc, type, this._getTotalMoney);
-    }, new ChartData());
+    const moneyChartData = types.reduce((acc, type) => transformData(acc, type, this._getTotalMoney), new ChartData());
 
-    const transportChartData = eventTypes.transfer.reduce((acc, type) => {
-      return transformData(acc, type, this._getTotalNumberOfTrips);
-    }, new ChartData());
+    const transportChartData = eventTypes.transfer.reduce((acc, type) => transformData(acc, type, this._getTotalNumberOfTrips), new ChartData());
 
-    const timeSpendChartData = types.reduce((acc, type) => {
-      return transformData(acc, type, this._getTotalDuration);
-    }, new ChartData());
+    const timeSpendChartData = types.reduce((acc, type) => transformData(acc, type, this._getTotalDuration), new ChartData());
 
     createChart(moneyCtx, moneyChartData, Titles.MONEY, (val) => `€ ${val}`);
     createChart(transportCtx, transportChartData, Titles.TRANSPORT, (val) => `${val}x`);
