@@ -132,14 +132,14 @@ class Stats extends AbstractView {
 
   _getTotalMoney(type) {
     return this._points.reduce((acc, point) => {
-      let price = point.type === type ? parseInt(point.price, 10) : 0;
+      const price = point.type === type ? parseInt(point.price, 10) : 0;
       return acc + price;
     }, 0);
   }
 
   _getTotalDuration(type) {
     return this._points.reduce((acc, point) => {
-      let duration = point.type === type ? point.duration : 0;
+      const duration = point.type === type ? point.duration : 0;
       return acc + duration;
     }, 0);
   }
@@ -169,7 +169,7 @@ class Stats extends AbstractView {
     timeSpendCtx.height = BAR_HEIGHT * 4;
 
 
-    let typesGroups = Object.values(eventTypes);
+    const typesGroups = Object.values(eventTypes);
     const types = typesGroups.reduce((acc, group) => {
       acc.push(...group);
       return acc;
