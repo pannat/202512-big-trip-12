@@ -77,9 +77,10 @@ class Provider {
           return newPoint;
         });
     }
+
     const localNewPointId = nanoid;
-    const localNewPoint = Object.assign({}, point, {id: localNewPointId});
-    this._pointsStore.setItem(localNewPointId, PointsModel.adaptToServer(localNewPoint));
+    const localNewPoint = Object.assign({}, PointsModel.adaptToClient(point), {id: localNewPointId});
+    this._pointsStore.setItem(localNewPointId, point);
     this._isNeedSync = true;
     return Promise.resolve(localNewPoint);
   }
@@ -93,10 +94,10 @@ class Provider {
         });
     }
 
-    this._pointsStore.setItem(point.id, PointsModel.adaptToServer(Object.assign({}, point)));
+    this._pointsStore.setItem(point.id, point);
     this._isNeedSync = true;
 
-    return Promise.resolve(point);
+    return Promise.resolve(PointsModel.adaptToClient(point));
   }
 
   deletePoint(point) {

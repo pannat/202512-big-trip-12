@@ -210,8 +210,9 @@ class Trip {
             this._pointsModel.addPoint(updateType, point);
             this._pointNewPresenter.destroy();
           })
-          .catch(() => {
+          .catch((error) => {
             this._pointNewPresenter.setAborting();
+            throw new Error(error);
           });
         break;
 
@@ -221,8 +222,9 @@ class Trip {
           .then((point) => {
             this._pointsModel.updatePoint(updateType, point);
           })
-          .catch(() => {
+          .catch((error) => {
             this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
+            throw new Error(error);
           });
         break;
 
@@ -232,8 +234,9 @@ class Trip {
           .then(() => {
             this._pointsModel.deletePoint(updateType, update);
           })
-          .catch(() => {
+          .catch((error) => {
             this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
+            throw new Error(error);
           });
         break;
     }

@@ -16,7 +16,7 @@ import Provider from "./api/provider";
 import {MenuItem, UpdateType} from "./constants";
 import {render, RenderPosition, remove} from "./utils/render";
 
-const AUTHORIZATION = `Basic er835jdwedw`;
+const AUTHORIZATION = `Basic er835tedfedw`;
 const END_POINT = `https://12.ecmascript.pages.academy/big-trip`;
 const StorePrefix = {
   POINTS: `points-localstorage`,
@@ -78,8 +78,8 @@ const tripPresenter = new TripPresenter(tripContainerElement, pointsModel, filte
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, pointsModel);
 const filterPresenter = new FilterPresenter(controlsElement, pointsModel, filterModel);
 tripPresenter.init();
-tripInfoPresenter.init();
 filterPresenter.init();
+tripInfoPresenter.init();
 
 Promise.all([
   apiWithProvider.getDestinations(),
@@ -111,11 +111,11 @@ buttonNewPointElement.addEventListener(`click`, () => {
 
 window.addEventListener(`load`, () => {
   navigator.serviceWorker.register(`/sw.js`)
-    .then((resp) => {
-      console.log(resp);
-      console.log(`ServiceWorker available`);
-    }).catch(() => {
-      console.error(`ServiceWorker isn't available`);
+    .then(() => {
+      document.title += ` [sw register]`;
+    })
+    .catch((error) => {
+      throw new Error(error);
     });
 });
 

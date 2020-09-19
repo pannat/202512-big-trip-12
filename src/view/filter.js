@@ -29,12 +29,12 @@ class Filter extends AbstractView {
     this._onFilterChange = this._onFilterChange.bind(this);
   }
 
-  restoreHandlers() {
-    this.getElement().addEventListener(`change`, this._onFilterChange);
-  }
-
   setOnFilterChange(callback) {
     this._callback.filterChange = callback;
+  }
+
+  restoreHandlers() {
+    this.getElement().addEventListener(`change`, this._onFilterChange);
   }
 
   _getTemplate() {

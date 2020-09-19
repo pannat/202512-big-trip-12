@@ -244,7 +244,7 @@ class PointEdit extends SmartView {
     this._onButtonResetClick = this._onButtonResetClick.bind(this);
     this._onFormSubmit = this._onFormSubmit.bind(this);
     this._onPriceChange = this._onPriceChange.bind(this);
-    this._onApplyOffersChange = this._onApplyOffersChange.bind(this);
+    this._onOffersChange = this._onOffersChange.bind(this);
     this.destroyDataPickers = this.destroyDataPickers.bind(this);
 
     this._setInnerHandlers();
@@ -328,7 +328,7 @@ class PointEdit extends SmartView {
 
   _setInnerHandlers() {
     this.getElement().addEventListener(`change`, this._onTypeChange);
-    this.getElement().addEventListener(`change`, this._onApplyOffersChange);
+    this.getElement().addEventListener(`change`, this._onOffersChange);
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._onDestinationChange);
     this.getElement().querySelector(`.event__input--price`).addEventListener(`input`, this._onPriceChange);
   }
@@ -393,7 +393,7 @@ class PointEdit extends SmartView {
     true);
   }
 
-  _onApplyOffersChange(evt) {
+  _onOffersChange(evt) {
     if (!evt.target.classList.contains(`event__offer-checkbox`)) {
       return;
     }

@@ -69,8 +69,8 @@ const handleFetch = (evt) => {
               return response;
             }
 
-            const clonedResponse = response.clone();
             if (request.method !== METHOD_NOT_CACHED) {
+              const clonedResponse = response.clone();
               caches.open(CACHE_NAME)
                 .then((cache) => cache.put(request, clonedResponse));
             }

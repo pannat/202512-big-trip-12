@@ -57,8 +57,7 @@ class Filter {
   }
 
   _handleModelEvent(updateType) {
-    if (updateType === UpdateType.MAJOR ||
-        updateType === UpdateType.INIT) {
+    if (updateType === UpdateType.MAJOR) {
       this.destroy();
       this.init();
     }
