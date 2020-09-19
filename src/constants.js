@@ -1,17 +1,12 @@
 const eventTypes = {
   transfer: [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`],
-  activity: [`check`, `sightseeing`, `restaurant`]
+  activity: [`check-in`, `sightseeing`, `restaurant`]
 };
 
 const SortType = {
   EVENT: `event`,
   TIME: `time`,
   PRICE: `price`
-};
-
-const groupToPretext = {
-  transfer: `to`,
-  activity: `in`
 };
 
 const UserAction = {
@@ -38,4 +33,9 @@ const MenuItem = {
   STATS: `stats`
 };
 
-export {UserAction, UpdateType, FilterType, groupToPretext, eventTypes, SortType, MenuItem};
+const groupToPretext = {
+  transfer: `to`,
+  activity: `in`
+};
+
+export {UserAction, UpdateType, FilterType, eventTypes, SortType, MenuItem, groupToPretext};

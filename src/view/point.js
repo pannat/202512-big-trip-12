@@ -58,9 +58,6 @@ class Point extends AbstractView {
   }
   setOnButtonClick(callback) {
     this._callback.clickButton = callback;
-  }
-
-  restoreHandlers() {
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._onButtonClick);
   }
 

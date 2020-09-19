@@ -46,7 +46,7 @@ class Api {
       .then((updatedPoint) => PointModel.adaptToClient(updatedPoint));
   }
 
-  deletePoint(id) {
+  deletePoint({id}) {
     return this._load({
       url: `points/${id}`,
       method: Method.DELETE,

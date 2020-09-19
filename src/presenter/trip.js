@@ -210,7 +210,7 @@ class Trip {
             this._pointsModel.addPoint(updateType, point);
             this._pointNewPresenter.destroy();
           })
-          .catch((error) => {
+          .catch(() => {
             this._pointNewPresenter.setAborting();
           });
         break;
@@ -228,7 +228,7 @@ class Trip {
 
       case UserAction.DELETE_POINT:
         this._pointPresenter[update.id].setViewState(PointPresenterViewState.DELETING);
-        this._api.deletePoint(update.id)
+        this._api.deletePoint(update)
           .then(() => {
             this._pointsModel.deletePoint(updateType, update);
           })
@@ -246,7 +246,12 @@ class Trip {
         this.init();
         break;
       case UpdateType.MINOR:
-        this._pointPresenter[data.id].init(data);
+        this._clearPointsLists();
+        this._renderPointsLists();
+        break;
+      case UpdateType.PATCH:
+        this._pointPresenter[data.id].updateData(data);
+        this._pointPresenter[data.id].setViewState(PointPresenterViewState.DEFAULT);
         break;
       case UpdateType.INIT:
         this._isLoading = false;

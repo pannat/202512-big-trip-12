@@ -16,11 +16,14 @@ import Provider from "./api/provider";
 import {MenuItem, UpdateType} from "./constants";
 import {render, RenderPosition, remove} from "./utils/render";
 
-const AUTHORIZATION = `Basic er835jdzbdw`;
+const AUTHORIZATION = `Basic er835jdwedw`;
 const END_POINT = `https://12.ecmascript.pages.academy/big-trip`;
-const STORE_PREFIX = `bigtrip-localstorage`;
+const StorePrefix = {
+  POINTS: `points-localstorage`,
+  DESTINATIONS: `destinations-localstorage`,
+  OFFERS: `offers-localstorage`,
+};
 const STORE_VER = `v12`;
-const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
 
 const tripMainElement = document.querySelector(`.trip-main`);
 const controlsElement = tripMainElement.querySelector(`.trip-controls`);
@@ -28,7 +31,11 @@ const buttonNewPointElement = tripMainElement.querySelector(`.trip-main__event-a
 const mainBodyElement = document.querySelector(`.page-main .page-body__container`);
 const tripContainerElement = mainBodyElement.querySelector(`.trip-events`);
 
-buttonNewPointElement.disabled = true;
+const StoreName = {
+  POINTS: `${StorePrefix.POINTS}-${STORE_VER}`,
+  DESTINATIONS: `${StorePrefix.DESTINATIONS}-${STORE_VER}`,
+  OFFERS: `${StorePrefix.OFFERS}-${STORE_VER}`,
+};
 
 const handlePointNewFormClose = () => {
   buttonNewPointElement.disabled = false;
@@ -50,9 +57,14 @@ const handleMenuItemClick = (menuItem) => {
       break;
   }
 };
+
+buttonNewPointElement.disabled = true;
+
 const api = new Api(END_POINT, AUTHORIZATION);
-const store = new Store(window.localStorage, STORE_NAME);
-const apiWithProvider = new Provider(api, store);
+const pointsStore = new Store(window.localStorage, StoreName.POINTS);
+const destinationStore = new Store(window.localStorage, StoreName.DESTINATIONS);
+const offersStore = new Store(window.localStorage, StoreName.OFFERS);
+const apiWithProvider = new Provider(api, pointsStore, destinationStore, offersStore);
 
 const pointsModel = new PointsModel();
 const filterModel = new FilterModel();
@@ -70,8 +82,8 @@ tripInfoPresenter.init();
 filterPresenter.init();
 
 Promise.all([
-  api.getDestinations(),
-  api.getOffers()
+  apiWithProvider.getDestinations(),
+  apiWithProvider.getOffers()
 ])
   .then(([destination, offersLists]) => {
     dictionariesModel.setDestination(destination);
@@ -97,23 +109,26 @@ buttonNewPointElement.addEventListener(`click`, () => {
   buttonNewPointElement.disabled = true;
 });
 
-// window.addEventListener(`load`, () => {
-//   navigator.serviceWorker.register(`/sw.js`)
-//     .then(() => {
-//       console.log(`ServiceWorker available`);
-//     }).catch(() => {
-//       console.error(`ServiceWorker isn't available`);
-//     });
-// });
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`/sw.js`)
+    .then((resp) => {
+      console.log(resp);
+      console.log(`ServiceWorker available`);
+    }).catch(() => {
+      console.error(`ServiceWorker isn't available`);
+    });
+});
 
-// window.addEventListener(`online`, () => {
-//   document.title = document.title.replace(` [offline]`, ``);
-//   apiWithProvider.syncPoints()
-//     .then((points) => pointsModel.setPoints(UpdateType.MAJOR, points));
-// });
-//
-// window.addEventListener(`offline`, () => {
-//   document.title += ` [offline]`;
-// });
+window.addEventListener(`online`, () => {
+  document.title = document.title.replace(` [offline]`, ``);
+  if (apiWithProvider.getIsNeedSync()) {
+    apiWithProvider.syncPoints()
+      .then((points) => pointsModel.setPoints(UpdateType.MINOR, points));
+  }
+});
+
+window.addEventListener(`offline`, () => {
+  document.title += ` [offline]`;
+});
 
 

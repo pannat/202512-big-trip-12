@@ -4,6 +4,7 @@ const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VER}`;
 
 const HTTP_STATUS_OK = 200;
 const RESPONSE_SAFE_TYPE = `basic`;
+const METHOD_NOT_CACHED = 'POST';
 
 self.addEventListener(`install`, (evt) => {
   evt.waitUntil(
@@ -55,7 +56,6 @@ self.addEventListener(`activate`, (evt) => {
 
 const handleFetch = (evt) => {
   const {request} = evt;
-  console.log(evt)
   evt.respondWith(
       caches.match(request)
       .then((cacheResponse) => {
@@ -70,9 +70,10 @@ const handleFetch = (evt) => {
             }
 
             const clonedResponse = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => cache.put(request, clonedResponse));
+            if (request.method !== METHOD_NOT_CACHED) {
+              caches.open(CACHE_NAME)
+                .then((cache) => cache.put(request, clonedResponse));
+            }
 
             return response;
           });

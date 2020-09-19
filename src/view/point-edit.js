@@ -279,7 +279,7 @@ class PointEdit extends SmartView {
   }
 
   reset(point) {
-    this.updateData(PointEdit.parsePointToData(point), true);
+    this.updateData(PointEdit.parsePointToData(point));
     this.destroyDataPickers();
   }
 
@@ -335,7 +335,7 @@ class PointEdit extends SmartView {
 
   _onFormSubmit(evt) {
     evt.preventDefault();
-    this._callback.formSubmit(PointEdit.parsePointToData(this._data));
+    this._callback.formSubmit(PointEdit.parseDataToPoint(this._data));
   }
 
   _onButtonCloseClick(evt) {
@@ -345,8 +345,7 @@ class PointEdit extends SmartView {
 
   _onFavoriteChange(evt) {
     evt.preventDefault();
-    this.updateData({isFavorite: !this._data.isFavorite}, true);
-    this._callback.favoriteChange(PointEdit.parseDataToPoint(this._data));
+    this._callback.favoriteChange({isFavorite: !this._data.isFavorite});
   }
 
   _onTypeChange(evt) {
@@ -418,7 +417,7 @@ class PointEdit extends SmartView {
   }
 
   _onButtonResetClick() {
-    this._callback.buttonResetClick(PointEdit.parseDataToPoint(this._data));
+    this._callback.buttonResetClick(PointEdit.parsePointToData(this._data));
   }
 
   static parsePointToData(point) {
@@ -427,7 +426,7 @@ class PointEdit extends SmartView {
         point,
         {
           isNew: !point.id,
-          key: point.id ? `new` : point.id,
+          key: point.id ? point.id : `new`,
           pretext: groupToPretext[calculateGroup(point.type)],
           isSaving: false,
           isDeleting: false,

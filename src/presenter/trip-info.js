@@ -64,8 +64,7 @@ class TripInfo {
   }
 
   _handleModelEvent(updateType) {
-    if (updateType === UpdateType.MINOR ||
-    updateType === UpdateType.PATCH) {
+    if (updateType === UpdateType.PATCH) {
       return;
     }
 
