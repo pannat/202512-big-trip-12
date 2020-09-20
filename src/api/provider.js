@@ -10,7 +10,7 @@ const createStoreStructure = (items) => {
 };
 
 const getSyncedPoints = (items) => {
-  return items.filter(({success}) => success).map(({payload}) => payload.points);
+  return items.filter(({success}) => success).map(({payload}) => payload.point);
 };
 
 class Provider {
@@ -115,15 +115,16 @@ class Provider {
   syncPoints() {
     if (Provider.isOnline()) {
       const storePoints = Object.values(this._pointsStore.getItems());
-
       return this._api.syncPoints(storePoints)
         .then((response) => {
+
           const createdPoints = getSyncedPoints(response.created);
           const updatedPoints = getSyncedPoints(response.updated);
-
-          const items = createStoreStructure([...createdPoints, ...updatedPoints]);
-
+          const points = [...createdPoints, ...updatedPoints];
+          const items = createStoreStructure(points);
           this._pointsStore.setItems(items);
+          this._isNeedSync = false;
+          return points.map(PointsModel.adaptToClient);
         });
     }
     return Promise.reject(new Error(`Sync data failed`));

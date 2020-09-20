@@ -59,7 +59,8 @@ class Api {
       method: Method.POST,
       body: JSON.stringify(points),
       headers: new Headers({"Content-Type": `application/json`})
-    });
+    })
+      .then(Api.toJSON);
   }
 
   getDestinations() {
