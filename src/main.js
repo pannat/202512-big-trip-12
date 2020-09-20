@@ -81,27 +81,25 @@ tripPresenter.init();
 filterPresenter.init();
 tripInfoPresenter.init();
 
-Promise.all([
-  apiWithProvider.getDestinations(),
-  apiWithProvider.getOffers()
-])
-  .then(([destination, offersLists]) => {
-    dictionariesModel.setDestination(destination);
-    dictionariesModel.setOffersLists(offersLists);
-
-    apiWithProvider.getPoints()
-      .then((points) => {
-        pointsModel.setPoints(UpdateType.INIT, points);
-        buttonNewPointElement.disabled = false;
-      })
-      .catch((error) => {
-        buttonNewPointElement.disabled = false;
-        pointsModel.setPoints(UpdateType.INIT, []);
-        throw new Error(error);
-      });
+apiWithProvider.getPoints()
+  .then((points) => {
+    pointsModel.setPoints(UpdateType.INIT, points);
   })
   .catch((error) => {
+    pointsModel.setPoints(UpdateType.INIT, []);
     throw new Error(error);
+  })
+  .finally(() => {
+    Promise.all([
+      apiWithProvider.getDestinations(),
+      apiWithProvider.getOffers()
+    ]).then(([destination, offersLists]) => {
+      dictionariesModel.setDestination(destination);
+      dictionariesModel.setOffersLists(offersLists);
+      buttonNewPointElement.disabled = false;
+    }).catch(() => {
+      throw new Error(`Destinations or offers don't loaded. Button create new event not available`);
+    });
   });
 
 buttonNewPointElement.addEventListener(`click`, () => {
@@ -123,7 +121,12 @@ window.addEventListener(`online`, () => {
   document.title = document.title.replace(` [offline]`, ``);
   if (apiWithProvider.getIsNeedSync()) {
     apiWithProvider.syncPoints()
-      .then((points) => pointsModel.setPoints(UpdateType.MINOR, points));
+      .then((points) => {
+        pointsModel.setPoints(UpdateType.MINOR, points);
+      })
+      .catch((error) => {
+        throw new Error(`Sync data failed. ${error}`);
+      });
   }
 });
 

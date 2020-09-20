@@ -121,10 +121,10 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
         ${destinationTemplate}
     </section>`.trim() : ``;
 
-  const destinationsList = `
+  const destinationsList = destinationList ? `
             <datalist id="destination-list-${key}">
               ${destinationList.map((destinationItem) => `<option value="${destinationItem.name}"></option>`).join(``)}
-            </datalist>`.trim();
+            </datalist>`.trim() : ``;
 
 
   return `<form class="trip-events__item  event  event--edit" action="#" method="post">
@@ -295,7 +295,8 @@ class PointEdit extends SmartView {
 
   _getTemplate() {
     const [typeOfOffers] = this._dictionaries.offersLists.filter((list) => list.type === this._data.type);
-    this._offersCorrespondingToType = typeOfOffers.offers;
+    this._offersCorrespondingToType = typeOfOffers ? typeOfOffers.offers : [];
+
     return createPointTemplate(this._data, this._offersCorrespondingToType, this._dictionaries.destinations);
   }
 
