@@ -2,7 +2,7 @@ import AbstractView from "./abstract";
 import moment from "moment";
 
 const createDayTemplate = (day, number) => {
-  const date = day ? moment(day).format(`DD MMM`) : ``;
+  const date = day ? moment(day, `ll`).format(`DD MMM`) : ``;
   number = day ? number + 1 : ``;
 
   return `<li class="trip-days__item day">

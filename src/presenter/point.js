@@ -67,7 +67,7 @@ class PointPresenter {
     this._point = point;
 
     this._pointView = new PointView(this._point);
-    this._pointEditView = new PointEditView(this._dictionariesModel.getDestinations(), this._dictionariesModel.getOffersLists(), this._point);
+    this._pointEditView = new PointEditView(this._dictionariesModel.getDictionaries(), this._point);
     this._pointEditView.setOnFormSubmit(this._handleFormSubmit);
     this._pointEditView.setOnButtonCloseClick(this._replaceFormToCard);
     this._pointEditView.setOnFavoriteChange(this._handleFavoriteClick);

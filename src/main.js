@@ -16,7 +16,7 @@ import Provider from "./api/provider";
 import {MenuItem, UpdateType} from "./constants";
 import {render, RenderPosition, remove} from "./utils/render";
 
-const AUTHORIZATION = `Basic er835tedfedw`;
+const AUTHORIZATION = `Basic er83565ghdw`;
 const END_POINT = `https://12.ecmascript.pages.academy/big-trip`;
 const StorePrefix = {
   POINTS: `points-localstorage`,
@@ -93,9 +93,11 @@ apiWithProvider.getPoints()
     Promise.all([
       apiWithProvider.getDestinations(),
       apiWithProvider.getOffers()
-    ]).then(([destination, offersLists]) => {
-      dictionariesModel.setDestination(destination);
-      dictionariesModel.setOffersLists(offersLists);
+    ]).then(([destinations, offersLists]) => {
+      dictionariesModel.setDictionaries({
+        destinations,
+        offersLists
+      });
       buttonNewPointElement.disabled = false;
     }).catch(() => {
       throw new Error(`Destinations or offers don't loaded. Button create new event not available`);

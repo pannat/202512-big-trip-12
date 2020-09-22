@@ -6,9 +6,11 @@ import {SortType, UserAction, UpdateType, FilterType} from "../constants";
 import NoPoints from "../view/no-points";
 import Sort from "../view/sort";
 import PointPresenter, {State as PointPresenterViewState} from "./point";
-import PointNew from "./point-new";
+import PointNewPresenter from "./point-new";
 
 import PointsModel from "../model/points";
+
+import moment from "moment";
 
 class Trip {
   constructor(container, pointsModel, filterModel, dictionariesModel, api) {
@@ -35,7 +37,7 @@ class Trip {
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
-    this._pointNewPresenter = new PointNew(
+    this._pointNewPresenter = new PointNewPresenter(
         this._container,
         this._handleViewAction,
         this._dictionariesModel
@@ -45,6 +47,7 @@ class Trip {
   init() {
     this._pointsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
+    this._dictionariesModel.addObserver(this._handleModelEvent);
     this._renderTrip();
   }
 
@@ -125,7 +128,7 @@ class Trip {
   _getUniqueDays() {
     const uniqueDays = [];
     this._getPoints().forEach(({dates}) => {
-      const startDay = dates.startDate.format(`ll`);
+      const startDay = moment(dates.startDate).format(`ll`);
       if (uniqueDays.indexOf(startDay) === -1) {
         uniqueDays.push(startDay);
       }
@@ -152,7 +155,7 @@ class Trip {
     this._daysView.getTripPointsLists().forEach((element, i) => {
       let pointsForDay = points;
       if (days.length > 1) {
-        pointsForDay = points.filter(({dates}) => dates.startDate.format(`ll`) === days[i]);
+        pointsForDay = points.filter(({dates}) => moment(dates.startDate).format(`ll`) === days[i]);
       }
       pointsForDay.forEach((point) => {
         const pointPresenter = new PointPresenter(element, this._handleViewAction, this._handleModeChange, this._dictionariesModel);
@@ -249,8 +252,10 @@ class Trip {
         this.init();
         break;
       case UpdateType.MINOR:
-        this._clearPointsLists();
-        this._renderPointsLists();
+        if (!this._noPointsView) {
+          this._clearPointsLists();
+          this._renderPointsLists();
+        }
         break;
       case UpdateType.PATCH:
         this._pointPresenter[data.id].updateData(data);

@@ -24,7 +24,7 @@ class PointNew {
       return;
     }
 
-    this._pointEditView = new PointEdit(this._dictionariesModel.getDestinations(), this._dictionariesModel.getOffersLists());
+    this._pointEditView = new PointEdit(this._dictionariesModel.getDictionaries());
     this._pointEditView.setOnFormSubmit(this._handleFormSubmit);
     this._pointEditView.setOnButtonResetClick(this._handleButtonCancelClick);
     this._pointEditView.restoreHandlers();

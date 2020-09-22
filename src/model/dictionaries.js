@@ -1,23 +1,21 @@
-class Dictionaries {
+import Observer from "../utils/observer";
+import {UpdateType} from "../constants";
+
+class Dictionaries extends Observer {
   constructor() {
-    this._destination = [];
-    this._offersLists = [];
+    super();
+    this._dictionaries = {};
   }
 
-  setDestination(destination) {
-    this._destination = destination.slice(0);
+  setDictionaries(dictionaries) {
+    Object.entries(dictionaries).forEach(([key, value]) => {
+      this._dictionaries[key] = value.slice(0);
+    });
+    this._notify(UpdateType.MINOR);
   }
 
-  setOffersLists(offersLists) {
-    this._offersLists = offersLists.slice(0);
-  }
-
-  getDestinations() {
-    return this._destination;
-  }
-
-  getOffersLists() {
-    return this._offersLists;
+  getDictionaries() {
+    return this._dictionaries;
   }
 }
 

@@ -11,8 +11,8 @@ const POINT_BLANK = {
   type: `taxi`,
   price: 0,
   dates: {
-    startDate: moment(),
-    endDate: moment().add(1, `days`)
+    startDate: null,
+    endDate: null
   },
   destination: {
     name: ``,
@@ -22,8 +22,6 @@ const POINT_BLANK = {
   offers: [],
   isFavorite: false
 };
-
-const FORMAT_DATEPICKER = `d/m/Y H:S`;
 
 const createEventTypesListTemplate = (currentType, key) => `
                   ${Object.keys(eventTypes).map((eventGroup) => `<fieldset class="event__type-group">
@@ -102,7 +100,7 @@ const createButtonsForEditModeTemplate = (key, isFavorite, isDisabled) => `
           <span class="visually-hidden">Close event</span>
       </button>`.trim();
 
-const createPointTemplate = ({type, pretext, destination, dates, price, offers, isFavorite, key, isNew, isSaving, isDeleting, isDisabled}, offersList, destinationList) => {
+const createPointTemplate = ({type, pretext, destination, price, offers, isFavorite, key, isNew, isSaving, isDeleting, isDisabled}, offersList, destinationList) => {
   const typeDisplay = `${getUpperFirst(type)} ${pretext}`;
   const currentCity = destination && destination.name ? destination.name : ``;
 
@@ -120,7 +118,6 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
         ${offersTemplate}
         ${destinationTemplate}
     </section>`.trim() : ``;
-
   const destinationsList = destinationList ? `
             <datalist id="destination-list-${key}">
               ${destinationList.map((destinationItem) => `<option value="${destinationItem.name}"></option>`).join(``)}
@@ -169,7 +166,6 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                     id="event-start-time-${key}"
                     type="text"
                     name="event-start-time"
-                    value="${dates.startDate}"
                     ${isDisabled ? `disabled` : ``}
                 >
                 &mdash;
@@ -181,7 +177,6 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
                     id="event-end-time-${key}"
                     type="text"
                     name="event-end-time"
-                    value="${dates.endDate}"
                     ${isDisabled ? `disabled` : ``}
                 >
               </div>
@@ -220,13 +215,10 @@ const createPointTemplate = ({type, pretext, destination, dates, price, offers, 
 };
 
 class PointEdit extends SmartView {
-  constructor(destinations, offersLists, point = POINT_BLANK) {
+  constructor(dictionaries, point = POINT_BLANK) {
     super();
     this._data = PointEdit.parsePointToData(point);
-    this._dictionaries = {
-      destinations,
-      offersLists
-    };
+    this._dictionaries = dictionaries;
 
     this._datepicker = {
       startDate: null,
@@ -294,22 +286,32 @@ class PointEdit extends SmartView {
   }
 
   _getTemplate() {
-    const [typeOfOffers] = this._dictionaries.offersLists.filter((list) => list.type === this._data.type);
-    this._offersCorrespondingToType = typeOfOffers ? typeOfOffers.offers : [];
+    let destinations = [];
 
-    return createPointTemplate(this._data, this._offersCorrespondingToType, this._dictionaries.destinations);
+    if ((this._dictionaries.offersLists && this._dictionaries.offersLists.length)
+      && (this._dictionaries.destinations && this._dictionaries.destinations.length)) {
+      const [typeOfOffers] = this._dictionaries.offersLists.filter((list) => list.type === this._data.type);
+      this._offersCorrespondingToType = typeOfOffers ? typeOfOffers.offers : [];
+      destinations = this._dictionaries.destinations;
+    }
+
+    return createPointTemplate(this._data, this._offersCorrespondingToType, destinations);
   }
 
   _setDatepickers() {
+    const formatDate = (date) => moment(date).format(`DD/MM/YYYY HH:mm`);
+
     this.destroyDataPickers();
 
     this._datepicker.startDate = flatpickr(
         this.getElement().querySelector(`[name="event-start-time"]`),
         {
-          dateFormat: FORMAT_DATEPICKER,
+          formatDate,
           enableTime: true,
-          defaultDate: this._data.dates.startDate.valueOf(),
           [`time_24hr`]: true,
+          defaultDate: this._data.dates.startDate,
+          maxDate: moment(this._data.dates.endDate).subtract(1, `minutes`).valueOf(),
+          minuteIncrement: 1,
           onChange: this._onStartDatePickerChange,
         }
     );
@@ -317,11 +319,12 @@ class PointEdit extends SmartView {
     this._datepicker.endDate = flatpickr(
         this.getElement().querySelector(`[name="event-end-time"]`),
         {
-          dateFormat: FORMAT_DATEPICKER,
+          formatDate,
           enableTime: true,
           [`time_24hr`]: true,
-          defaultDate: this._data.dates.endDate.valueOf(),
-          minDate: this._data.dates.startDate.valueOf(),
+          defaultDate: this._data.dates.endDate,
+          minDate: moment(this._data.dates.startDate).add(1, `minutes`).valueOf(),
+          minuteIncrement: 1,
           onChange: this._onEndDatePickerChange
         }
     );
@@ -334,8 +337,49 @@ class PointEdit extends SmartView {
     this.getElement().querySelector(`.event__input--price`).addEventListener(`input`, this._onPriceChange);
   }
 
+  _validateForm() {
+    let isValid = true;
+    const priceField = this.getElement().querySelector(`.event__field-group--price`);
+    const timeField = this.getElement().querySelector(`.event__field-group--time`);
+    const destinationField = this.getElement().querySelector(`.event__field-group--destination`);
+
+    const highlightInvalidField = (field) => {
+      field.style.border = `1px solid red`;
+      field.style.borderRadius = `4px`;
+    };
+    const reset = (field) => {
+      field.style.border = ``;
+      field.style.borderRadius = ``;
+    };
+
+    [timeField, priceField, destinationField].forEach((field) => {
+      reset(field);
+    });
+
+    if (!this._data.dates.startDate || !this._data.dates.endDate) {
+      highlightInvalidField(timeField);
+      isValid = false;
+    }
+
+    if (this._data.price <= 0 || !this._data.price) {
+      highlightInvalidField(priceField);
+      isValid = false;
+    }
+
+    if (!this._data.destination.name) {
+      highlightInvalidField(destinationField);
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
   _onFormSubmit(evt) {
     evt.preventDefault();
+    if (!this._validateForm()) {
+      return;
+    }
+
     this._callback.formSubmit(PointEdit.parseDataToPoint(this._data));
   }
 
@@ -354,6 +398,10 @@ class PointEdit extends SmartView {
       return;
     }
 
+    if (!this._dictionaries.offers) {
+      return;
+    }
+
     this.updateData({
       type: evt.target.value,
       pretext: groupToPretext[calculateGroup(evt.target.value)],
@@ -362,25 +410,31 @@ class PointEdit extends SmartView {
   }
 
   _onDestinationChange(evt) {
-    const destination = this._dictionaries.destinations.find((it) => it.name === evt.target.value);
+    const destination = this._dictionaries.destinations ? this._dictionaries.destinations.find((it) => it.name === evt.target.value) : this._data.destination;
     this.updateData({destination});
   }
 
   _onStartDatePickerChange(value) {
+    const startDate = Date.parse(value[0]);
+
+    this._datepicker.endDate.config.minDate = moment(startDate).add(1, `minutes`).valueOf();
+
     this.updateData({
       dates: {
-        startDate: value[0],
+        startDate,
         endDate: this._data.dates.endDate
       },
     }, true);
-    this._datepicker.endDate.config.minDate = value[0];
   }
 
   _onEndDatePickerChange(value) {
+    let endDate = Date.parse(value[0]);
+    this._datepicker.startDate.config.maxDate = moment(endDate).subtract(1, `minutes`).valueOf();
+
     this.updateData({
       dates: {
         startDate: this._data.dates.startDate,
-        endDate: value[0]
+        endDate
       },
     }, true);
   }

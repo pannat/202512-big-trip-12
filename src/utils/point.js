@@ -12,12 +12,14 @@ const calculateGroup = (type) => {
 };
 
 const humanizeDuration = (diff) => {
+  if (diff <= -1) {
+    throw new Error(`Humanize duration failed. Duration cannot be less than 0`);
+  }
   const setFormatUnitTime = (unit) => unit > 9 ? unit : `0${unit}`;
 
   const days = setFormatUnitTime(moment.duration(diff).days());
   const hours = setFormatUnitTime(moment.duration(diff).hours());
   const minutes = setFormatUnitTime(moment.duration(diff).minutes());
-
   let duration = ``;
 
   if (parseInt(days, 10)) {

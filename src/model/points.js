@@ -58,14 +58,15 @@ class Points extends Observer {
         point,
         {
           dates: {
-            startDate: moment(point[`date_from`]),
-            endDate: moment(point[`date_to`]),
+            startDate: Date.parse(point[`date_from`]),
+            endDate: Date.parse(point[`date_to`]),
           },
           isFavorite: point[`is_favorite`],
           price: point[`base_price`]
         }
     );
-    adaptedPoint.duration = adaptedPoint.dates.endDate.diff(adaptedPoint.dates.startDate);
+
+    adaptedPoint.duration = moment(adaptedPoint.dates.endDate).diff(moment(adaptedPoint.dates.startDate));
     delete adaptedPoint[`date_from`];
     delete adaptedPoint[`date_to`];
     delete adaptedPoint[`is_favorite`];
@@ -79,8 +80,8 @@ class Points extends Observer {
         {},
         point,
         {
-          [`date_from`]: point.dates.startDate,
-          [`date_to`]: point.dates.endDate,
+          [`date_from`]: new Date(point.dates.startDate).toISOString(),
+          [`date_to`]: new Date(point.dates.endDate).toISOString(),
           [`is_favorite`]: point.isFavorite,
           [`base_price`]: parseInt(point.price, 10)
         }

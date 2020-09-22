@@ -78,7 +78,7 @@ class Provider {
         });
     }
 
-    const localNewPointId = nanoid;
+    const localNewPointId = nanoid();
     const localNewPoint = Object.assign({}, PointsModel.adaptToClient(point), {id: localNewPointId});
     this._pointsStore.setItem(localNewPointId, point);
     this._isNeedSync = true;
@@ -117,10 +117,8 @@ class Provider {
       const storePoints = Object.values(this._pointsStore.getItems());
       return this._api.syncPoints(storePoints)
         .then((response) => {
-
-          const createdPoints = getSyncedPoints(response.created);
           const updatedPoints = getSyncedPoints(response.updated);
-          const points = [...createdPoints, ...updatedPoints];
+          const points = [...response.created, ...updatedPoints];
           const items = createStoreStructure(points);
           this._pointsStore.setItems(items);
           this._isNeedSync = false;

@@ -16,9 +16,9 @@ const createPointTemplate = (type, pretext, destination, startDate, endDate, dur
 
                     <div class="event__schedule">
                       <p class="event__time">
-                        <time class="event__start-time" datetime="${startDate.toISOString()}">${startDate.format(`hh:mm`)}</time>
+                        <time class="event__start-time" datetime="${moment(startDate).format(`YYYY-MM-DDTHH:mm`)}">${startDate.format(`HH:mm`)}</time>
                         &mdash;
-                        <time class="event__end-time" datetime="${endDate.toISOString()}">${endDate.format(`hh:mm`)}</time>
+                        <time class="event__end-time" datetime="${moment(endDate).format(`YYYY-MM-DDTHH:mm`)}">${endDate.format(`HH:mm`)}</time>
                       </p>
                       <p class="event__duration">${duration}</p>
                     </div>
