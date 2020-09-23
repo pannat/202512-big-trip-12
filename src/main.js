@@ -16,7 +16,7 @@ import Provider from "./api/provider";
 import {MenuItem, UpdateType} from "./constants";
 import {render, RenderPosition, remove} from "./utils/render";
 
-const AUTHORIZATION = `Basic er83565ghdw`;
+const AUTHORIZATION = `Basic er83gbgh5ghdw`;
 const END_POINT = `https://12.ecmascript.pages.academy/big-trip`;
 const StorePrefix = {
   POINTS: `points-localstorage`,
@@ -48,6 +48,7 @@ const handleMenuItemClick = (menuItem) => {
       statsView = new StatsView(pointsModel.getPoints());
       render(mainBodyElement, statsView, RenderPosition.BEFORE_END);
       tripPresenter.destroy();
+      tripPresenter.destroyCreateNewPoint();
       break;
     case MenuItem.TABLE:
       navView.setMenuItem(MenuItem.TABLE);
@@ -70,7 +71,6 @@ const pointsModel = new PointsModel();
 const filterModel = new FilterModel();
 const dictionariesModel = new DictionariesModel();
 const navView = new NavView();
-navView.setOnMenuClick(handleMenuItemClick);
 render(controlsElement, navView, RenderPosition.BEFORE_END);
 
 let statsView = null;
@@ -101,6 +101,8 @@ apiWithProvider.getPoints()
       buttonNewPointElement.disabled = false;
     }).catch(() => {
       throw new Error(`Destinations or offers don't loaded. Button create new event not available`);
+    }).finally(() => {
+      navView.setOnMenuClick(handleMenuItemClick);
     });
   });
 

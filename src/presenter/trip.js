@@ -28,6 +28,7 @@ class Trip {
     this._daysView = null;
     this._sortView = null;
     this._noPointsView = null;
+    this._pointNewPresenter = null;
     this._loadingView = new LoadingView();
 
     this._pointPresenter = {};
@@ -36,12 +37,6 @@ class Trip {
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
-
-    this._pointNewPresenter = new PointNewPresenter(
-        this._container,
-        this._handleViewAction,
-        this._dictionariesModel
-    );
   }
 
   init() {
@@ -49,20 +44,6 @@ class Trip {
     this._filterModel.addObserver(this._handleModelEvent);
     this._dictionariesModel.addObserver(this._handleModelEvent);
     this._renderTrip();
-  }
-
-  _renderTrip() {
-    if (this._isLoading) {
-      this._renderLoading();
-      return;
-    }
-
-    if (this._getPoints().length) {
-      this._renderSort();
-      this._renderPointsLists();
-    } else {
-      this._renderNoPoints();
-    }
   }
 
   destroy() {
@@ -85,25 +66,54 @@ class Trip {
     this._filterModel.removeObserver(this._handleModelEvent);
   }
 
+  destroyCreateNewPoint() {
+    if (this._pointNewPresenter) {
+      this._pointNewPresenter.destroy();
+    }
+  }
+
   createPoint(callback) {
     const handleCloseCreatePoint = () => {
       if (!this._getPoints().length) {
         this._renderNoPoints();
       }
+      this._pointNewPresenter = null;
       callback();
     };
+
+    this._pointNewPresenter = new PointNewPresenter(
+        this._container,
+        this._handleViewAction,
+        this._dictionariesModel
+    );
 
     this._pointNewPresenter.init(handleCloseCreatePoint);
     if (this._getPoints().length) {
       if (this._filterModel.getFilter() !== FilterType.EVERYTHING) {
         this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
       } else {
-        this.destroy();
-        this.init();
+        remove(this._sortView);
+        this._sortView = null;
+        this._currentSortType = SortType.EVENT;
+        this._renderSort();
       }
     } else {
       remove(this._noPointsView);
       this._noPointsView = null;
+    }
+  }
+
+  _renderTrip() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
+    if (this._getPoints().length) {
+      this._renderSort();
+      this._renderPointsLists();
+    } else {
+      this._renderNoPoints();
     }
   }
 
@@ -121,7 +131,6 @@ class Trip {
       case SortType.TIME:
         return filteredPoints.sort((a, b) => b.duration - a.duration);
     }
-
     return filteredPoints.sort((a, b) => a.dates.startDate - b.dates.startDate);
   }
 
@@ -152,6 +161,7 @@ class Trip {
 
   _renderPoints(days) {
     const points = this._getPoints();
+
     this._daysView.getTripPointsLists().forEach((element, i) => {
       let pointsForDay = points;
       if (days.length > 1) {
@@ -200,8 +210,9 @@ class Trip {
     Object.values(this._pointPresenter).forEach((presenter) => {
       presenter.resetView();
     });
-
-    this._pointNewPresenter.destroy();
+    if (this._pointNewPresenter) {
+      this._pointNewPresenter.destroy();
+    }
   }
 
   _handleViewAction(actionType, updateType, update) {

@@ -74,7 +74,7 @@ class PointNew {
   _handleFormSubmit(point) {
     this._changeData(
         UserAction.ADD_POINT,
-        UpdateType.MAJOR,
+        UpdateType.MINOR,
         point
     );
   }

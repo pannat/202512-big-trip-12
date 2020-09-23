@@ -398,7 +398,7 @@ class PointEdit extends SmartView {
       return;
     }
 
-    if (!this._dictionaries.offers) {
+    if (!this._dictionaries.offersLists) {
       return;
     }
 

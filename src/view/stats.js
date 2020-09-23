@@ -45,7 +45,9 @@ const createChart = (selector, chartData, title, formatter) => {
         data: chartData.getData(),
         backgroundColor: `#ffffff`,
         hoverBackgroundColor: `#ffffff`,
-        anchor: `start`
+        anchor: `start`,
+        barThickness: 44,
+        minBarLength: 50
       }]
     },
     options: {
@@ -78,7 +80,6 @@ const createChart = (selector, chartData, title, formatter) => {
             display: false,
             drawBorder: false
           },
-          barThickness: 44,
         }],
         xAxes: [{
           ticks: {
@@ -89,7 +90,6 @@ const createChart = (selector, chartData, title, formatter) => {
             display: false,
             drawBorder: false
           },
-          minBarLength: 50
         }],
       },
       legend: {

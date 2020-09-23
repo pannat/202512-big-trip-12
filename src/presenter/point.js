@@ -135,7 +135,7 @@ class PointPresenter {
   _handleButtonDeleteClick(point) {
     this._changeData(
         UserAction.DELETE_POINT,
-        UpdateType.MAJOR,
+        UpdateType.MINOR,
         point
     );
   }
