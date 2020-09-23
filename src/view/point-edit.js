@@ -428,7 +428,7 @@ class PointEdit extends SmartView {
   }
 
   _onEndDatePickerChange(value) {
-    let endDate = Date.parse(value[0]);
+    const endDate = Date.parse(value[0]);
     this._datepicker.startDate.config.maxDate = moment(endDate).subtract(1, `minutes`).valueOf();
 
     this.updateData({
